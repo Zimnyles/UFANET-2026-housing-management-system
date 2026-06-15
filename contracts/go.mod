@@ -1,4 +1,4 @@
-module contracts
+module github.com/zimnyles/UFANET-2026-housing-management-system/contracts
 
 go 1.25.2
 

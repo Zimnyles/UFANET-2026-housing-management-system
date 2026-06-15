@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package auth;
+
+option go_package = "contracts/auth;auth";
+
+import "google/protobuf/empty.proto";
+
+service AuthService {
+  rpc Register(RegisterRequest) returns (AuthResponse);
+  rpc Login(LoginRequest) returns (AuthResponse);
+  rpc Refresh(RefreshRequest) returns (RefreshResponse);
+  rpc Logout(LogoutRequest) returns (google.protobuf.Empty);
+}
+
+message RegisterRequest {
+  string name     = 1;
+  string email    = 2;
+  string password = 3;
+}
+
+message LoginRequest {
+  string email    = 1;
+  string password = 2;
+}
+
+message RefreshRequest {
+  string refresh_token = 1;
+}
+
+message LogoutRequest {
+  string refresh_token = 1;
+}
+
+message AuthResponse {
+  string user_id        = 1;
+  string access_token   = 2;
+  string refresh_token  = 3;
+}
+
+message RefreshResponse {
+  string access_token = 1;
+}

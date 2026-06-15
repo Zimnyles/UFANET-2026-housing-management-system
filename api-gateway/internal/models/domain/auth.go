@@ -1,0 +1,26 @@
+package domain
+
+type RegisterRequest struct {
+	Name     string
+	Email    string
+	Password string
+}
+
+type LoginRequest struct {
+	Email    string
+	Password string
+}
+
+type RefreshRequest struct {
+	RefreshToken string
+}
+
+type TokenPair struct {
+	AccessToken  string
+	RefreshToken string
+}
+
+type AuthResult struct {
+	UserID string
+	Tokens TokenPair
+}

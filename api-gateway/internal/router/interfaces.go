@@ -22,3 +22,12 @@ type NotificationsHandler interface {
 	Register(c *fiber.Ctx) error
 	Unregister(c *fiber.Ctx) error
 }
+
+type ProfileHandler interface {
+	GetProfile(c *fiber.Ctx) error
+	UpsertProfile(c *fiber.Ctx) error
+	ListManagementCompanies(c *fiber.Ctx) error
+	CreateManagementCompany(c *fiber.Ctx) error
+	ListHouses(c *fiber.Ctx) error
+	CreateHouse(c *fiber.Ctx) error
+}

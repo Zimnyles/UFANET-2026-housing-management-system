@@ -22,4 +22,5 @@ var (
 	ErrPasswordTooShort = errors.New("password min length 8")
 	ErrPasswordTooLong  = errors.New("password max length 72")
 	ErrRefreshRequired  = errors.New("refresh_token is required")
+	ErrInvalidAdminCode = errors.New("invalid admin code")
 )

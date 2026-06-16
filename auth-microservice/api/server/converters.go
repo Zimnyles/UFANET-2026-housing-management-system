@@ -8,9 +8,10 @@ import (
 
 func ConvertFromProtoToRegisterRequestDTO(req *authpb.RegisterRequest) *dto.RegisterRequest {
 	return &dto.RegisterRequest{
-		Name:     req.GetName(),
-		Email:    req.GetEmail(),
-		Password: req.GetPassword(),
+		Name:      req.GetName(),
+		Email:     req.GetEmail(),
+		Password:  req.GetPassword(),
+		AdminCode: req.GetAdminCode(),
 	}
 }
 

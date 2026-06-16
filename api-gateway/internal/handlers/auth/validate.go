@@ -8,18 +8,6 @@ import (
 )
 
 func validateRegisterRequest(req *dto.RegisterRequest) error {
-	if req.Name == "" {
-		return app_errors.ErrRegisterNameRequired
-	}
-
-	if len(req.Name) < 2 {
-		return app_errors.ErrRegisterNameTooShort
-	}
-
-	if len(req.Name) > 100 {
-		return app_errors.ErrRegisterNameTooLong
-	}
-
 	if req.Email == "" {
 		return app_errors.ErrRegisterEmailRequired
 	}

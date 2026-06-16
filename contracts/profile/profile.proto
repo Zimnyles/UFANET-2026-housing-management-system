@@ -1,0 +1,96 @@
+syntax = "proto3";
+
+package profile;
+
+option go_package = "contracts/profile;profile";
+
+service ProfileService {
+  rpc GetProfile(GetProfileRequest)             returns (ProfileResponse);
+  rpc UpsertProfile(UpsertProfileRequest)       returns (ProfileResponse);
+  rpc IsProfileComplete(IsProfileCompleteRequest) returns (IsProfileCompleteResponse);
+
+  rpc CreateManagementCompany(CreateManagementCompanyRequest) returns (ManagementCompanyResponse);
+  rpc ListManagementCompanies(ListManagementCompaniesRequest) returns (ListManagementCompaniesResponse);
+
+  rpc CreateHouse(CreateHouseRequest)   returns (HouseResponse);
+  rpc ListHouses(ListHousesRequest)     returns (ListHousesResponse);
+}
+
+// ─── profile ──────────────────────────────────────────────────────────────────
+
+message Profile {
+  string user_id   = 1;
+  string full_name = 2;
+  string phone     = 3;
+  string apartment = 4;
+  string house_id  = 5;
+  string uk_id     = 6;
+}
+
+message GetProfileRequest {
+  string user_id = 1;
+}
+
+message UpsertProfileRequest {
+  string user_id   = 1;
+  string full_name = 2;
+  string phone     = 3;
+  string apartment = 4;
+  string house_id  = 5;
+}
+
+message ProfileResponse {
+  Profile profile = 1;
+}
+
+message IsProfileCompleteRequest {
+  string user_id = 1;
+}
+
+message IsProfileCompleteResponse {
+  bool complete = 1;
+}
+
+message ManagementCompany {
+  string id   = 1;
+  string name = 2;
+}
+
+message CreateManagementCompanyRequest {
+  string name = 1;
+}
+
+message ManagementCompanyResponse {
+  ManagementCompany company = 1;
+}
+
+message ListManagementCompaniesRequest {}
+
+message ListManagementCompaniesResponse {
+  repeated ManagementCompany companies = 1;
+}
+
+message House {
+  string id      = 1;
+  string name    = 2;
+  string address = 3;
+  string uk_id   = 4;
+}
+
+message CreateHouseRequest {
+  string name    = 1;
+  string address = 2;
+  string uk_id   = 3;
+}
+
+message HouseResponse {
+  House house = 1;
+}
+
+message ListHousesRequest {
+  string uk_id = 1;
+}
+
+message ListHousesResponse {
+  repeated House houses = 1;
+}

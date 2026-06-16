@@ -11,6 +11,7 @@ type Handlers struct {
 	Health        HealthHandler
 	News          NewsHandler
 	Notifications NotificationsHandler
+	Profile       ProfileHandler
 }
 
 type Router struct {
@@ -28,6 +29,7 @@ func (r *Router) Register() {
 	r.auth()
 	r.news()
 	r.notifications()
+	r.profile()
 }
 
 func (r *Router) health() {
@@ -55,4 +57,24 @@ func (r *Router) notifications() {
 	g.Use(r.mw.JWTAuth())
 	g.Post("/register", r.h.Notifications.Register)
 	g.Delete("/unregister", r.h.Notifications.Unregister)
+}
+
+func (r *Router) profile() {
+	g := r.app.Group("/profile")
+	g.Use(r.mw.JWTAuth())
+	g.Use(r.mw.Timeout())
+	g.Get("/", r.h.Profile.GetProfile)
+	g.Put("/", r.h.Profile.UpsertProfile)
+
+	mc := r.app.Group("/management-companies")
+	mc.Use(r.mw.JWTAuth())
+	mc.Use(r.mw.Timeout())
+	mc.Get("/", r.h.Profile.ListManagementCompanies)
+	mc.Post("/", r.mw.RequireRole(constants.RoleAdmin), r.h.Profile.CreateManagementCompany)
+
+	houses := r.app.Group("/houses")
+	houses.Use(r.mw.JWTAuth())
+	houses.Use(r.mw.Timeout())
+	houses.Get("/", r.h.Profile.ListHouses)
+	houses.Post("/", r.mw.RequireRole(constants.RoleAdmin), r.h.Profile.CreateHouse)
 }

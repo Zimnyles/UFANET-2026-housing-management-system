@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	app_errors "api-gateway/internal/errors"
+
 	"github.com/rs/zerolog"
 	authpb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/auth/langs/go"
 	"google.golang.org/grpc"

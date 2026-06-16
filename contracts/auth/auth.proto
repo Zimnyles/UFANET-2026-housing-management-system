@@ -14,9 +14,9 @@ service AuthService {
 }
 
 message RegisterRequest {
-  string name     = 1;
-  string email    = 2;
-  string password = 3;
+  reserved 1; // Тут раньше был name, но я решил его убрать, он тут не нужен :(
+  string email      = 2;
+  string password   = 3;
   string admin_code = 4;
 }
 

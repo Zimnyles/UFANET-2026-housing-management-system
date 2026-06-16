@@ -29,11 +29,36 @@ func (r *Repository) Migrate(ctx context.Context) error {
 			role       TEXT NOT NULL DEFAULT 'user',
 			created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 		);
+
+		CREATE TABLE IF NOT EXISTS admin_codes (
+			id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+			code       TEXT NOT NULL UNIQUE,
+			status     TEXT NOT NULL DEFAULT 'active',
+			created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+		);
+
+		INSERT INTO admin_codes (code, status)
+		VALUES ('123123123', 'active')
+		ON CONFLICT (code) DO NOTHING;
 	`)
 	if err != nil {
 		return fmt.Errorf("migrate: %w", err)
 	}
 	return nil
+}
+
+func (r *Repository) IsActiveAdminCode(ctx context.Context, code string) (bool, error) {
+	var exists bool
+	err := r.pool.QueryRow(ctx,
+		`SELECT EXISTS(
+			SELECT 1 FROM admin_codes WHERE code = $1 AND status = 'active'
+		)`,
+		code,
+	).Scan(&exists)
+	if err != nil {
+		return false, fmt.Errorf("check admin code: %w", err)
+	}
+	return exists, nil
 }
 
 func (r *Repository) CreateUser(ctx context.Context, user *domain.User) (*domain.User, error) {

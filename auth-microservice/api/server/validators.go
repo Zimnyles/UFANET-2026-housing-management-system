@@ -32,6 +32,9 @@ func ValidateRegisterRequest(req *authpb.RegisterRequest) error {
 	if len(req.GetPassword()) > 72 {
 		return infra_errors.ErrPasswordTooLong
 	}
+	if len(req.GetAdminCode()) > 72 {
+		return infra_errors.ErrInvalidAdminCode
+	}
 	return nil
 }
 

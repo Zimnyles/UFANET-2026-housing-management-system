@@ -52,8 +52,8 @@ github.com/valyala/fasthttp v1.51.0 h1:8b30A5JlZ6C7AS81RsWjYMQmrZG6feChmgAolCl1S
 github.com/valyala/fasthttp v1.51.0/go.mod h1:oI2XroL+lI7vdXyYoQk03bXBThfFl2cVdIA3Xl7cH8g=
 github.com/valyala/tcplisten v1.0.0 h1:rBHj/Xf+E1tRGZyWIWwJDiRY0zc1Js+CV5DqwacVSA8=
 github.com/valyala/tcplisten v1.0.0/go.mod h1:T0xQ8SeCZGxckz9qRXTfG43PvQ/mcWh7FwZEA7Ioqkc=
-github.com/zimnyles/UFANET-2026-housing-management-system/contracts v0.0.0-20260615161321-4eed48c3bb75 h1:fIKVXChwUNYS5srCJSuPuj/c/sdJHGRRtqgSmRhzwD8=
-github.com/zimnyles/UFANET-2026-housing-management-system/contracts v0.0.0-20260615161321-4eed48c3bb75/go.mod h1:g06B0aZ+1apmeoH8EH/ddLnny9Ab8KVeCbR5ZGfjf8g=
+github.com/zimnyles/UFANET-2026-housing-management-system/contracts v0.0.2 h1:W7Aaqm7YPvEvsaVwi3KgYJbwmJs0D4C8iOzvgtvMFE8=
+github.com/zimnyles/UFANET-2026-housing-management-system/contracts v0.0.2/go.mod h1:g06B0aZ+1apmeoH8EH/ddLnny9Ab8KVeCbR5ZGfjf8g=
 go.opentelemetry.io/auto/sdk v1.2.1 h1:jXsnJ4Lmnqd11kwkBV2LgLoFMZKizbCi5fNZ/ipaZ64=
 go.opentelemetry.io/auto/sdk v1.2.1/go.mod h1:KRTj+aOaElaLi+wW1kO/DZRXwkF4C5xPbEe3ZiIhN7Y=
 go.opentelemetry.io/otel v1.43.0 h1:mYIM03dnh5zfN7HautFE4ieIig9amkNANT+xcVxAj9I=

@@ -7,10 +7,12 @@ import (
 	health_handler "api-gateway/internal/handlers/health"
 	news_handler "api-gateway/internal/handlers/news"
 	notifications_handler "api-gateway/internal/handlers/notifications"
+	profile_handler "api-gateway/internal/handlers/profile"
 	"api-gateway/internal/middlewares"
 	"api-gateway/internal/router"
 	"api-gateway/resources"
 	auth_service "api-gateway/services/auth"
+	profile_service "api-gateway/services/profile"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -33,12 +35,14 @@ func (a *API) Start(ctx context.Context) error {
 	mw.SetGlobalMiddlewares()
 
 	authService := auth_service.New(a.res.AuthClient, a.res.Logger)
+	profileService := profile_service.New(a.res.ProfileClient, a.res.Logger)
 
 	handlers := router.Handlers{
 		Health:        health_handler.NewHandler(a.res.Env.ServiceName),
 		Auth:          auth_handler.NewHandler(authService, mw, a.res.Logger),
 		News:          news_handler.NewHandler(a.res.Logger),
 		Notifications: notifications_handler.NewHandler(a.res.Logger),
+		Profile:       profile_handler.NewHandler(profileService, a.res.Logger),
 	}
 
 	router.New(app, mw, handlers).Register()

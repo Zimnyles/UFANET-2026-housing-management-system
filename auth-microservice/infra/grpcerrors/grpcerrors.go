@@ -25,6 +25,7 @@ var errCodeMap = map[error]codes.Code{
 	infra_errors.ErrPasswordTooShort: codes.InvalidArgument,
 	infra_errors.ErrPasswordTooLong:  codes.InvalidArgument,
 	infra_errors.ErrRefreshRequired:  codes.InvalidArgument,
+	infra_errors.ErrInvalidAdminCode: codes.InvalidArgument,
 }
 
 func ToGrpcError(err error) error {

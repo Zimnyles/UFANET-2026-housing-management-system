@@ -29,6 +29,19 @@ func New(repo Repository, jwt JWTManager, hasher Hasher, logger *zerolog.Logger)
 func (s *AuthService) Register(ctx context.Context, d *dto.RegisterRequest) (*dto.AuthResult, error) {
 	req := domain.ConvertFromDTOToRegisterRequest(d)
 
+	role := "user"
+	if req.AdminCode != "" {
+		active, err := s.repo.IsActiveAdminCode(ctx, req.AdminCode)
+		if err != nil {
+			s.logger.Error().Err(err).Msg("register: check admin code failed")
+			return nil, err
+		}
+		if !active {
+			return nil, infra_errors.ErrInvalidAdminCode
+		}
+		role = "admin"
+	}
+
 	passwordHash, err := s.hasher.Hash(req.Password)
 	if err != nil {
 		return nil, fmt.Errorf("hash password: %w", err)
@@ -38,7 +51,7 @@ func (s *AuthService) Register(ctx context.Context, d *dto.RegisterRequest) (*dt
 		Name:         req.Name,
 		Email:        req.Email,
 		PasswordHash: passwordHash,
-		Role:         "user",
+		Role:         role,
 	})
 	if err != nil {
 		s.logger.Error().Err(err).Str("email", req.Email).Msg("register: create user failed")

@@ -1,0 +1,154 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "profile.proto",
+    "version": "version not set"
+  },
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {},
+  "definitions": {
+    "profileHouse": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "address": {
+          "type": "string"
+        },
+        "uk_id": {
+          "type": "string"
+        }
+      }
+    },
+    "profileHouseResponse": {
+      "type": "object",
+      "properties": {
+        "house": {
+          "$ref": "#/definitions/profileHouse"
+        }
+      }
+    },
+    "profileIsProfileCompleteResponse": {
+      "type": "object",
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        }
+      }
+    },
+    "profileListHousesResponse": {
+      "type": "object",
+      "properties": {
+        "houses": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/profileHouse"
+          }
+        }
+      }
+    },
+    "profileListManagementCompaniesResponse": {
+      "type": "object",
+      "properties": {
+        "companies": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/profileManagementCompany"
+          }
+        }
+      }
+    },
+    "profileManagementCompany": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "profileManagementCompanyResponse": {
+      "type": "object",
+      "properties": {
+        "company": {
+          "$ref": "#/definitions/profileManagementCompany"
+        }
+      }
+    },
+    "profileProfile": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string"
+        },
+        "full_name": {
+          "type": "string"
+        },
+        "phone": {
+          "type": "string"
+        },
+        "apartment": {
+          "type": "string"
+        },
+        "house_id": {
+          "type": "string"
+        },
+        "uk_id": {
+          "type": "string"
+        }
+      }
+    },
+    "profileProfileResponse": {
+      "type": "object",
+      "properties": {
+        "profile": {
+          "$ref": "#/definitions/profileProfile"
+        }
+      }
+    },
+    "protobufAny": {
+      "type": "object",
+      "properties": {
+        "type_url": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "format": "byte"
+        }
+      }
+    },
+    "runtimeError": {
+      "type": "object",
+      "properties": {
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "message": {
+          "type": "string"
+        },
+        "details": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/protobufAny"
+          }
+        }
+      }
+    }
+  }
+}

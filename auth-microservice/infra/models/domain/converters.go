@@ -4,9 +4,10 @@ import "auth-service/infra/models/dto"
 
 func ConvertFromDTOToRegisterRequest(d *dto.RegisterRequest) *RegisterRequest {
 	return &RegisterRequest{
-		Name:     d.Name,
-		Email:    d.Email,
-		Password: d.Password,
+		Name:      d.Name,
+		Email:     d.Email,
+		Password:  d.Password,
+		AdminCode: d.AdminCode,
 	}
 }
 

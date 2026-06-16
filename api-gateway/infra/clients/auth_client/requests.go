@@ -1,8 +1,9 @@
 package auth_client
 
 import (
-	"api-gateway/internal/models/domain"
 	"context"
+
+	"api-gateway/internal/models/domain"
 )
 
 func (c *AuthClient) Register(ctx context.Context, req *domain.RegisterRequest) (*domain.AuthResult, error) {
@@ -10,6 +11,7 @@ func (c *AuthClient) Register(ctx context.Context, req *domain.RegisterRequest) 
 	if err != nil {
 		return nil, err
 	}
+
 	return toDomainAuthResult(pb), nil
 }
 
@@ -18,6 +20,7 @@ func (c *AuthClient) Login(ctx context.Context, req *domain.LoginRequest) (*doma
 	if err != nil {
 		return nil, err
 	}
+
 	return toDomainAuthResult(pb), nil
 }
 
@@ -26,10 +29,12 @@ func (c *AuthClient) Refresh(ctx context.Context, req *domain.RefreshRequest) (d
 	if err != nil {
 		return domain.TokenPair{}, err
 	}
+
 	return toDomainTokenPair(pb), nil
 }
 
 func (c *AuthClient) Logout(ctx context.Context, refreshToken string) error {
 	_, err := c.client.Logout(ctx, toProtoLogoutRequest(refreshToken))
+
 	return err
 }

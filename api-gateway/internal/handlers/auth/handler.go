@@ -1,32 +1,38 @@
 package auth_handler
 
 import (
-	app_errors "api-gateway/internal/errors"
-	"api-gateway/internal/models/dto"
+	"strings"
+	"time"
 
+	app_errors "api-gateway/internal/errors"
+	"api-gateway/internal/models/constants"
+	"api-gateway/internal/models/dto"
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog"
 )
 
 type AuthHandler struct {
 	authService AuthService
+	blacklist   Blacklist
 	logger      *zerolog.Logger
 }
 
-func NewHandler(authService AuthService, logger *zerolog.Logger) *AuthHandler {
-	return &AuthHandler{authService: authService, logger: logger}
+func NewHandler(authService AuthService, blacklist Blacklist, logger *zerolog.Logger) *AuthHandler {
+	return &AuthHandler{authService: authService, blacklist: blacklist, logger: logger}
 }
 
 func (h *AuthHandler) Register(c *fiber.Ctx) error {
 	var req dto.RegisterRequest
+
 	if err := c.BodyParser(&req); err != nil {
 		return app_errors.Respond(c, app_errors.ErrBadRequest)
 	}
+
 	if err := validateRegisterRequest(&req); err != nil {
 		return app_errors.Respond(c, err)
 	}
 
-	result, err := h.authService.Register(c.Context(), toDomainRegisterRequest(req))
+	result, err := h.authService.Register(c.UserContext(), toDomainRegisterRequest(req))
 	if err != nil {
 		return app_errors.Respond(c, err)
 	}
@@ -39,11 +45,12 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return app_errors.Respond(c, app_errors.ErrBadRequest)
 	}
+
 	if err := validateLoginRequest(&req); err != nil {
 		return app_errors.Respond(c, err)
 	}
 
-	result, err := h.authService.Login(c.Context(), toDomainLoginRequest(req))
+	result, err := h.authService.Login(c.UserContext(), toDomainLoginRequest(req))
 	if err != nil {
 		return app_errors.Respond(c, err)
 	}
@@ -56,11 +63,16 @@ func (h *AuthHandler) Refresh(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return app_errors.Respond(c, app_errors.ErrBadRequest)
 	}
+
 	if err := validateRefreshRequest(&req); err != nil {
 		return app_errors.Respond(c, err)
 	}
 
-	tokens, err := h.authService.Refresh(c.Context(), toDomainRefreshRequest(req))
+	if h.blacklist.IsBlacklisted(req.RefreshToken) {
+		return app_errors.Respond(c, app_errors.ErrInvalidToken)
+	}
+
+	tokens, err := h.authService.Refresh(c.UserContext(), toDomainRefreshRequest(req))
 	if err != nil {
 		return app_errors.Respond(c, err)
 	}
@@ -74,7 +86,26 @@ func (h *AuthHandler) Logout(c *fiber.Ctx) error {
 		return app_errors.Respond(c, app_errors.ErrBadRequest)
 	}
 
-	if err := h.authService.Logout(c.Context(), req.RefreshToken); err != nil {
+	if err := validateRefreshRequest(&req); err != nil {
+		return app_errors.Respond(c, err)
+	}
+
+	if header := c.Get("Authorization"); header != "" {
+		if parts := strings.SplitN(header, " ", 2); len(parts) == 2 {
+			expiry, ok := c.Locals(constants.LocalTokenExpiry).(time.Time)
+			if ok {
+				if err := h.blacklist.BlacklistToken(parts[1], time.Until(expiry)); err != nil {
+					h.logger.Warn().Err(err).Msg("logout: failed to blacklist access token")
+				}
+			}
+		}
+	}
+
+	if err := h.blacklist.BlacklistRawJWT(req.RefreshToken); err != nil {
+		h.logger.Warn().Err(err).Msg("logout: failed to blacklist refresh token")
+	}
+
+	if err := h.authService.Logout(c.UserContext(), req.RefreshToken); err != nil {
 		return app_errors.Respond(c, err)
 	}
 

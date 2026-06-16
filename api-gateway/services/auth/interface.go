@@ -1,8 +1,9 @@
 package auth_service
 
 import (
-	"api-gateway/internal/models/domain"
 	"context"
+
+	"api-gateway/internal/models/domain"
 )
 
 type AuthClient interface {

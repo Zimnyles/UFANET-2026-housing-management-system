@@ -3,7 +3,6 @@ package notifications_handler
 import (
 	app_errors "api-gateway/internal/errors"
 	"api-gateway/internal/models/dto"
-
 	"github.com/gofiber/fiber/v2"
 	"github.com/rs/zerolog"
 )
@@ -21,9 +20,11 @@ func (h *NotificationsHandler) Register(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return app_errors.Respond(c, app_errors.ErrBadRequest)
 	}
+
 	if err := validateRegisterDeviceRequest(&req); err != nil {
 		return app_errors.Respond(c, err)
 	}
+
 	return app_errors.Respond(c, app_errors.ErrNotImplemented)
 }
 

@@ -11,6 +11,7 @@ func (mw *Middlewares) Timeout() fiber.Handler {
 		ctx, cancel := context.WithTimeout(c.UserContext(), mw.requestTimeout)
 		defer cancel()
 		c.SetUserContext(ctx)
+
 		return c.Next()
 	}
 }

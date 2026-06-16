@@ -1,8 +1,10 @@
 package auth_handler
 
 import (
-	"api-gateway/internal/models/domain"
 	"context"
+	"time"
+
+	"api-gateway/internal/models/domain"
 )
 
 type AuthService interface {
@@ -10,4 +12,10 @@ type AuthService interface {
 	Login(ctx context.Context, req *domain.LoginRequest) (*domain.AuthResult, error)
 	Refresh(ctx context.Context, req *domain.RefreshRequest) (*domain.TokenPair, error)
 	Logout(ctx context.Context, refreshToken string) error
+}
+
+type Blacklist interface {
+	BlacklistToken(token string, ttl time.Duration) error
+	BlacklistRawJWT(token string) error
+	IsBlacklisted(token string) bool
 }

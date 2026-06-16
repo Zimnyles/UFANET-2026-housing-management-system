@@ -1,9 +1,9 @@
 package auth_client
 
 import (
-	authpb "contracts/auth/langs/go"
 	"context"
 
+	authpb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/auth/langs/go"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/types/known/emptypb"
 )

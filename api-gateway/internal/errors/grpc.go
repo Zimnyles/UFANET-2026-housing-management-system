@@ -17,6 +17,7 @@ func FromGRPC(err error) error {
 		if errors.Is(err, ErrClientDial) {
 			return ErrClientDial
 		}
+
 		return ErrInternal
 	}
 
@@ -31,7 +32,7 @@ func FromGRPC(err error) error {
 		return ErrBadRequest
 	case codes.Unavailable:
 		return ErrClientDial
-	case codes.DeadlineExceeded:
+	case codes.DeadlineExceeded, codes.Canceled:
 		return ErrRequestTimeout
 	default:
 		return ErrInternal

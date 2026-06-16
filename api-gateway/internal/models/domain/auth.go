@@ -1,9 +1,10 @@
 package domain
 
 type RegisterRequest struct {
-	Name     string
-	Email    string
-	Password string
+	Name      string
+	Email     string
+	Password  string
+	AdminCode string
 }
 
 type LoginRequest struct {

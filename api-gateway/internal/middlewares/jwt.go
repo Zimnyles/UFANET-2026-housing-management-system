@@ -1,11 +1,11 @@
 package middlewares
 
 import (
-	app_errors "api-gateway/internal/errors"
-	"api-gateway/internal/models/constants"
 	"fmt"
 	"strings"
 
+	app_errors "api-gateway/internal/errors"
+	"api-gateway/internal/models/constants"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
 )
@@ -28,10 +28,17 @@ func (mw *Middlewares) JWTAuth() fiber.Handler {
 			return app_errors.Respond(c, app_errors.ErrInvalidAuthFormat)
 		}
 
-		token, err := jwt.ParseWithClaims(parts[1], &Claims{}, func(t *jwt.Token) (interface{}, error) {
+		tokenStr := parts[1]
+
+		if mw.IsBlacklisted(tokenStr) {
+			return app_errors.Respond(c, app_errors.ErrInvalidToken)
+		}
+
+		token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
 				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
 			}
+
 			return []byte(mw.jwtSecret), nil
 		})
 
@@ -46,6 +53,8 @@ func (mw *Middlewares) JWTAuth() fiber.Handler {
 
 		c.Locals(constants.LocalUserID, claims.UserID)
 		c.Locals(constants.LocalRole, claims.Role)
+		c.Locals(constants.LocalTokenExpiry, claims.ExpiresAt.Time)
+
 		return c.Next()
 	}
 }

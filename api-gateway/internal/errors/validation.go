@@ -13,6 +13,8 @@ var (
 	ErrRegisterPasswordRequired = errors.New("register request: password is required")
 	ErrRegisterPasswordTooShort = errors.New("register request: password min length 8")
 	ErrRegisterPasswordTooLong  = errors.New("register request: password max length 72")
+
+	ErrRegisterInvalidAdminCode = errors.New("register request: invalid admin code")
 )
 
 var (

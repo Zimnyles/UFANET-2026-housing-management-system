@@ -1,7 +1,8 @@
 package constants
 
 const (
-	// Это строковые ключи для c.Locals()
-	LocalUserID = "user_id"
-	LocalRole   = "role"
+	LocalUserID      = "user_id"
+	LocalRole        = "role"
+	LocalRequestID   = "request_id"
+	LocalTokenExpiry = "token_expiry"
 )

@@ -3,6 +3,7 @@ package middlewares
 import (
 	"time"
 
+	"api-gateway/internal/models/constants"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
@@ -11,6 +12,7 @@ import (
 func (mw *Middlewares) requestLogger(logger *zerolog.Logger) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		start := time.Now()
+
 		requestID := c.Get("X-Request-ID")
 		if requestID == "" {
 			requestID = uuid.NewString()
@@ -23,6 +25,7 @@ func (mw *Middlewares) requestLogger(logger *zerolog.Logger) fiber.Handler {
 			Logger()
 
 		c.Set("X-Request-ID", requestID)
+		c.Locals(constants.LocalRequestID, requestID)
 
 		err := c.Next()
 

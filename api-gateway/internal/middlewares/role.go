@@ -3,7 +3,6 @@ package middlewares
 import (
 	app_errors "api-gateway/internal/errors"
 	"api-gateway/internal/models/constants"
-
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -18,9 +17,11 @@ func (mw *Middlewares) RequireRole(roles ...string) fiber.Handler {
 		if !ok || role == "" {
 			return app_errors.Respond(c, app_errors.ErrUnauthorized)
 		}
+
 		if _, ok := allowed[role]; !ok {
 			return app_errors.Respond(c, app_errors.ErrForbidden)
 		}
+
 		return c.Next()
 	}
 }

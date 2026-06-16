@@ -46,5 +46,6 @@ func StatusCode(err error) int {
 			return code
 		}
 	}
+
 	return http.StatusInternalServerError
 }

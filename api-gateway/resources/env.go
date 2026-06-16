@@ -20,6 +20,8 @@ type Env struct {
 	RateLimitMax        int           `envconfig:"RATE_LIMIT_MAX"        default:"10"`
 	RateLimitExpiration time.Duration `envconfig:"RATE_LIMIT_EXPIRATION" default:"1m"`
 
+	Prefork bool `envconfig:"APP_PREFORK" default:"false"`
+
 	RequestTimeout time.Duration `envconfig:"REQUEST_TIMEOUT" default:"200ms"`
 
 	AuthAddr string `envconfig:"AUTH_ADDR" default:"localhost:50051"`

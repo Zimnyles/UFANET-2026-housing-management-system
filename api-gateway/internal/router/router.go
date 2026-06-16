@@ -3,7 +3,6 @@ package router
 import (
 	"api-gateway/internal/middlewares"
 	"api-gateway/internal/models/constants"
-
 	"github.com/gofiber/fiber/v2"
 )
 

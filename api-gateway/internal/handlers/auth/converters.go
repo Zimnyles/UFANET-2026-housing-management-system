@@ -7,9 +7,10 @@ import (
 
 func toDomainRegisterRequest(req dto.RegisterRequest) *domain.RegisterRequest {
 	return &domain.RegisterRequest{
-		Name:     req.Name,
-		Email:    req.Email,
-		Password: req.Password,
+		Name:      req.Name,
+		Email:     req.Email,
+		Password:  req.Password,
+		AdminCode: req.AdminCode,
 	}
 }
 

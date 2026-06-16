@@ -1,0 +1,110 @@
+services:
+
+  # ─── Infrastructure ────────────────────────────────────────────────────────
+
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres        
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - hms-net
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --save "" --appendonly no
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    networks:
+      - hms-net
+
+  # ─── Microservices ─────────────────────────────────────────────────────────
+
+  auth-service:
+    build:
+      context: ./auth-microservice
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_NAME: auth-service
+      APP_HOST: 0.0.0.0
+      APP_PORT: 50051
+      LOG_LEVEL: info
+
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+      JWT_ACCESS_TTL: 15m
+      JWT_REFRESH_TTL: 168h
+
+      REQUEST_TIMEOUT: 5s
+
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: auth
+      POSTGRES_SSLMODE: disable
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - hms-net
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      APP_NAME: api-gateway
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8080
+      APP_PREFORK: "false"         # prefork несовместим с Docker (SO_REUSEPORT)
+      LOG_LEVEL: info
+
+      JWT_SECRET: ${JWT_SECRET:-change-me-in-production}
+
+      RATE_LIMIT_MAX: 100
+      RATE_LIMIT_EXPIRATION: 1m
+
+      REQUEST_TIMEOUT: 5s
+
+      AUTH_ADDR: auth-service:50051
+
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ""
+      REDIS_DB: 0
+    depends_on:
+      auth-service:
+        condition: service_started
+      redis:
+        condition: service_healthy
+    networks:
+      - hms-net
+
+volumes:
+  postgres_data:
+
+networks:
+  hms-net:
+    driver: bridge

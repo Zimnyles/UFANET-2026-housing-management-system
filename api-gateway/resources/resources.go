@@ -3,6 +3,7 @@ package resources
 import (
 	"api-gateway/infra/clients/auth_client"
 	"api-gateway/infra/clients/profile_client"
+	"api-gateway/infra/clients/requests_client"
 	"api-gateway/pkg/logger"
 	"github.com/gofiber/fiber/v2"
 	redisstore "github.com/gofiber/storage/redis/v2"
@@ -10,11 +11,12 @@ import (
 )
 
 type Resources struct {
-	Env           *Env
-	Logger        *zerolog.Logger
-	Cache         fiber.Storage
-	AuthClient    *auth_client.AuthClient
-	ProfileClient *profile_client.ProfileClient
+	Env            *Env
+	Logger         *zerolog.Logger
+	Cache          fiber.Storage
+	AuthClient     *auth_client.AuthClient
+	ProfileClient  *profile_client.ProfileClient
+	RequestsClient *requests_client.RequestsClient
 }
 
 func InitResources() (*Resources, error) {
@@ -45,12 +47,18 @@ func InitResources() (*Resources, error) {
 		return nil, err
 	}
 
+	requestsClient, err := requests_client.New(env.RequestsAddr, logger)
+	if err != nil {
+		return nil, err
+	}
+
 	return &Resources{
-		Env:           env,
-		Logger:        logger,
-		Cache:         cache,
-		AuthClient:    authClient,
-		ProfileClient: profileClient,
+		Env:            env,
+		Logger:         logger,
+		Cache:          cache,
+		AuthClient:     authClient,
+		ProfileClient:  profileClient,
+		RequestsClient: requestsClient,
 	}, nil
 }
 
@@ -61,6 +69,10 @@ func (r *Resources) Close() {
 
 	if err := r.ProfileClient.Close(); err != nil {
 		r.Logger.Error().Err(err).Msg("failed to close profile client")
+	}
+
+	if err := r.RequestsClient.Close(); err != nil {
+		r.Logger.Error().Err(err).Msg("failed to close requests client")
 	}
 
 	if err := r.Cache.Reset(); err != nil {

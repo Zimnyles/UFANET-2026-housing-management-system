@@ -19,31 +19,31 @@ func NewAuthServer(service AuthService, logger *zerolog.Logger) *AuthServer {
 }
 
 func (s *AuthServer) Register(ctx context.Context, req *authpb.RegisterRequest) (*authpb.AuthResponse, error) {
-	result, err := s.service.Register(ctx, ConvertFromProtoToRegisterRequestDTO(req))
+	result, err := s.service.Register(ctx, ConvertFromProtoToRegisterRequest(req))
 	if err != nil {
 		return nil, err
 	}
-	return ConvertFromDTOToAuthResponse(result), nil
+	return ConvertFromDomainToAuthResponse(result), nil
 }
 
 func (s *AuthServer) Login(ctx context.Context, req *authpb.LoginRequest) (*authpb.AuthResponse, error) {
-	result, err := s.service.Login(ctx, ConvertFromProtoToLoginRequestDTO(req))
+	result, err := s.service.Login(ctx, ConvertFromProtoToLoginRequest(req))
 	if err != nil {
 		return nil, err
 	}
-	return ConvertFromDTOToAuthResponse(result), nil
+	return ConvertFromDomainToAuthResponse(result), nil
 }
 
 func (s *AuthServer) Refresh(ctx context.Context, req *authpb.RefreshRequest) (*authpb.RefreshResponse, error) {
-	result, err := s.service.Refresh(ctx, ConvertFromProtoToRefreshRequestDTO(req))
+	result, err := s.service.Refresh(ctx, ConvertFromProtoToRefreshRequest(req))
 	if err != nil {
 		return nil, err
 	}
-	return ConvertFromDTOToRefreshResponse(result), nil
+	return ConvertFromDomainToRefreshResponse(result), nil
 }
 
 func (s *AuthServer) Logout(ctx context.Context, req *authpb.LogoutRequest) (*emptypb.Empty, error) {
-	if err := s.service.Logout(ctx, ConvertFromProtoToLogoutRequestDTO(req)); err != nil {
+	if err := s.service.Logout(ctx, ConvertFromProtoToLogoutRequest(req)); err != nil {
 		return nil, err
 	}
 	return &emptypb.Empty{}, nil

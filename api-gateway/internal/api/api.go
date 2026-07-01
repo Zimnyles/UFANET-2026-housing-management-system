@@ -8,11 +8,13 @@ import (
 	news_handler "api-gateway/internal/handlers/news"
 	notifications_handler "api-gateway/internal/handlers/notifications"
 	profile_handler "api-gateway/internal/handlers/profile"
+	requests_handler "api-gateway/internal/handlers/requests"
 	"api-gateway/internal/middlewares"
 	"api-gateway/internal/router"
 	"api-gateway/resources"
 	auth_service "api-gateway/services/auth"
 	profile_service "api-gateway/services/profile"
+	requests_service "api-gateway/services/requests"
 	"github.com/gofiber/fiber/v2"
 )
 
@@ -36,6 +38,7 @@ func (a *API) Start(ctx context.Context) error {
 
 	authService := auth_service.New(a.res.AuthClient, a.res.Logger)
 	profileService := profile_service.New(a.res.ProfileClient, a.res.Logger)
+	requestsService := requests_service.New(a.res.RequestsClient, a.res.Logger)
 
 	handlers := router.Handlers{
 		Health:        health_handler.NewHandler(a.res.Env.ServiceName),
@@ -43,6 +46,7 @@ func (a *API) Start(ctx context.Context) error {
 		News:          news_handler.NewHandler(a.res.Logger),
 		Notifications: notifications_handler.NewHandler(a.res.Logger),
 		Profile:       profile_handler.NewHandler(profileService, a.res.Logger),
+		Requests:      requests_handler.NewHandler(requestsService, a.res.Logger),
 	}
 
 	router.New(app, mw, handlers).Register()

@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package notifications;
+
+option go_package = "contracts/notifications;notifications";
+
+import "google/protobuf/empty.proto";
+
+service NotificationService {
+  rpc RegisterDevice(RegisterDeviceRequest)       returns (google.protobuf.Empty);
+  rpc UnregisterDevice(UnregisterDeviceRequest)   returns (google.protobuf.Empty);
+  rpc GetUserNotifications(GetUserNotificationsRequest) returns (GetUserNotificationsResponse);
+}
+
+// ─── device ───────────────────────────────────────────────────────────────────
+
+message Device {
+  string device_token = 1;
+  string platform     = 2; // ios | android | web
+  string user_id      = 3;
+}
+
+message RegisterDeviceRequest {
+  string device_token = 1;
+  string platform     = 2;
+  string user_id      = 3;
+}
+
+message UnregisterDeviceRequest {
+  string device_token = 1;
+  string user_id      = 2;
+}
+
+// ─── notification ─────────────────────────────────────────────────────────────
+
+message Notification {
+  string id         = 1;
+  string user_id    = 2; // адресат-житель; пусто = широковещательное
+  string house_id   = 3; // адресат-дом; пусто = персональное
+  string type       = 4; // news | request_status | request_comment
+  string title      = 5;
+  string body       = 6;
+  string created_at = 7; // RFC3339
+  bool   read       = 8;
+}
+
+message GetUserNotificationsRequest {
+  string user_id = 1;
+  int32  limit   = 2; // default 20
+  int32  offset  = 3; // default 0
+}
+
+message GetUserNotificationsResponse {
+  repeated Notification notifications = 1;
+  int32                 total         = 2;
+}

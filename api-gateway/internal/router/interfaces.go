@@ -31,3 +31,12 @@ type ProfileHandler interface {
 	ListHouses(c *fiber.Ctx) error
 	CreateHouse(c *fiber.Ctx) error
 }
+
+type RequestsHandler interface {
+	Create(c *fiber.Ctx) error
+	List(c *fiber.Ctx) error
+	Get(c *fiber.Ctx) error
+	UpdateStatus(c *fiber.Ctx) error
+	AddComment(c *fiber.Ctx) error
+	GetComments(c *fiber.Ctx) error
+}

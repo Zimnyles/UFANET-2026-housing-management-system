@@ -12,6 +12,7 @@ type Handlers struct {
 	News          NewsHandler
 	Notifications NotificationsHandler
 	Profile       ProfileHandler
+	Requests      RequestsHandler
 }
 
 type Router struct {
@@ -30,6 +31,7 @@ func (r *Router) Register() {
 	r.news()
 	r.notifications()
 	r.profile()
+	r.requests()
 }
 
 func (r *Router) health() {
@@ -77,4 +79,16 @@ func (r *Router) profile() {
 	houses.Use(r.mw.Timeout())
 	houses.Get("/", r.h.Profile.ListHouses)
 	houses.Post("/", r.mw.RequireRole(constants.RoleAdmin), r.h.Profile.CreateHouse)
+}
+
+func (r *Router) requests() {
+	g := r.app.Group("/requests")
+	g.Use(r.mw.JWTAuth())
+	g.Use(r.mw.Timeout())
+	g.Post("/", r.h.Requests.Create)
+	g.Get("/", r.h.Requests.List)
+	g.Get("/:id", r.h.Requests.Get)
+	g.Patch("/:id/status", r.mw.RequireRole(constants.RoleAdmin), r.h.Requests.UpdateStatus)
+	g.Post("/:id/comment", r.h.Requests.AddComment)
+	g.Get("/:id/comments", r.h.Requests.GetComments)
 }

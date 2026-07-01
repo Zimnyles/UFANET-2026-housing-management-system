@@ -1,40 +1,39 @@
 package server
 
 import (
-	"auth-service/infra/models/dto"
+	"auth-service/infra/models/domain"
 
 	authpb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/auth/langs/go"
 )
 
-func ConvertFromProtoToRegisterRequestDTO(req *authpb.RegisterRequest) *dto.RegisterRequest {
-	return &dto.RegisterRequest{
-		Name:      req.GetName(),
+func ConvertFromProtoToRegisterRequest(req *authpb.RegisterRequest) *domain.RegisterRequest {
+	return &domain.RegisterRequest{
 		Email:     req.GetEmail(),
 		Password:  req.GetPassword(),
 		AdminCode: req.GetAdminCode(),
 	}
 }
 
-func ConvertFromProtoToLoginRequestDTO(req *authpb.LoginRequest) *dto.LoginRequest {
-	return &dto.LoginRequest{
+func ConvertFromProtoToLoginRequest(req *authpb.LoginRequest) *domain.LoginRequest {
+	return &domain.LoginRequest{
 		Email:    req.GetEmail(),
 		Password: req.GetPassword(),
 	}
 }
 
-func ConvertFromProtoToRefreshRequestDTO(req *authpb.RefreshRequest) *dto.RefreshRequest {
-	return &dto.RefreshRequest{
+func ConvertFromProtoToRefreshRequest(req *authpb.RefreshRequest) *domain.RefreshRequest {
+	return &domain.RefreshRequest{
 		RefreshToken: req.GetRefreshToken(),
 	}
 }
 
-func ConvertFromProtoToLogoutRequestDTO(req *authpb.LogoutRequest) *dto.LogoutRequest {
-	return &dto.LogoutRequest{
+func ConvertFromProtoToLogoutRequest(req *authpb.LogoutRequest) *domain.LogoutRequest {
+	return &domain.LogoutRequest{
 		RefreshToken: req.GetRefreshToken(),
 	}
 }
 
-func ConvertFromDTOToAuthResponse(d *dto.AuthResult) *authpb.AuthResponse {
+func ConvertFromDomainToAuthResponse(d *domain.AuthResult) *authpb.AuthResponse {
 	return &authpb.AuthResponse{
 		UserId:       d.UserID,
 		AccessToken:  d.AccessToken,
@@ -42,7 +41,7 @@ func ConvertFromDTOToAuthResponse(d *dto.AuthResult) *authpb.AuthResponse {
 	}
 }
 
-func ConvertFromDTOToRefreshResponse(d *dto.RefreshResult) *authpb.RefreshResponse {
+func ConvertFromDomainToRefreshResponse(d *domain.RefreshResult) *authpb.RefreshResponse {
 	return &authpb.RefreshResponse{
 		AccessToken: d.AccessToken,
 	}

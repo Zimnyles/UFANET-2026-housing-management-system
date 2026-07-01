@@ -35,6 +35,7 @@ var (
 )
 
 var (
+	ErrRequestIDRequired          = errors.New("request: id is required")
 	ErrRequestTitleRequired       = errors.New("create request: title is required")
 	ErrRequestTitleTooShort       = errors.New("create request: title min length 3")
 	ErrRequestTitleTooLong        = errors.New("create request: title max length 255")
@@ -50,8 +51,9 @@ var (
 )
 
 var (
-	ErrCommentContentRequired = errors.New("add comment request: content is required")
-	ErrCommentContentTooLong  = errors.New("add comment request: content max length 1000")
+	ErrCommentRequestIDRequired = errors.New("add comment request: request_id is required")
+	ErrCommentContentRequired   = errors.New("add comment request: content is required")
+	ErrCommentContentTooLong    = errors.New("add comment request: content max length 1000")
 )
 
 var (
@@ -61,17 +63,17 @@ var (
 )
 
 var (
-	ErrProfileFullNameRequired    = errors.New("profile: full_name is required")
-	ErrProfileFullNameTooShort    = errors.New("profile: full_name min length 2")
-	ErrProfileFullNameTooLong     = errors.New("profile: full_name max length 100")
-	ErrProfilePhoneRequired       = errors.New("profile: phone is required")
-	ErrProfilePhoneTooLong        = errors.New("profile: phone max length 20")
-	ErrProfileApartmentRequired   = errors.New("profile: apartment is required")
-	ErrProfileApartmentTooLong    = errors.New("profile: apartment max length 20")
-	ErrProfileHouseIDRequired     = errors.New("profile: house_id is required")
-	ErrCompanyNameRequired        = errors.New("company: name is required")
-	ErrCompanyNameTooLong         = errors.New("company: name max length 200")
-	ErrHouseNameRequired          = errors.New("house: name is required")
-	ErrHouseAddressRequired       = errors.New("house: address is required")
-	ErrHouseUKIDRequired          = errors.New("house: uk_id is required")
+	ErrProfileFullNameRequired  = errors.New("profile: full_name is required")
+	ErrProfileFullNameTooShort  = errors.New("profile: full_name min length 2")
+	ErrProfileFullNameTooLong   = errors.New("profile: full_name max length 100")
+	ErrProfilePhoneRequired     = errors.New("profile: phone is required")
+	ErrProfilePhoneTooLong      = errors.New("profile: phone max length 20")
+	ErrProfileApartmentRequired = errors.New("profile: apartment is required")
+	ErrProfileApartmentTooLong  = errors.New("profile: apartment max length 20")
+	ErrProfileHouseIDRequired   = errors.New("profile: house_id is required")
+	ErrCompanyNameRequired      = errors.New("company: name is required")
+	ErrCompanyNameTooLong       = errors.New("company: name max length 200")
+	ErrHouseNameRequired        = errors.New("house: name is required")
+	ErrHouseAddressRequired     = errors.New("house: address is required")
+	ErrHouseUKIDRequired        = errors.New("house: uk_id is required")
 )

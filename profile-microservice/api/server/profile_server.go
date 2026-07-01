@@ -17,22 +17,20 @@ func NewProfileServer(service ProfileService, logger *zerolog.Logger) *ProfileSe
 	return &ProfileServer{service: service, logger: logger}
 }
 
-// ─── profile ──────────────────────────────────────────────────────────────────
-
 func (s *ProfileServer) GetProfile(ctx context.Context, req *profilepb.GetProfileRequest) (*profilepb.ProfileResponse, error) {
 	p, err := s.service.GetProfile(ctx, req.GetUserId())
 	if err != nil {
 		return nil, err
 	}
-	return &profilepb.ProfileResponse{Profile: dtoToProtoProfile(p)}, nil
+	return &profilepb.ProfileResponse{Profile: domainToProtoProfile(p)}, nil
 }
 
 func (s *ProfileServer) UpsertProfile(ctx context.Context, req *profilepb.UpsertProfileRequest) (*profilepb.ProfileResponse, error) {
-	p, err := s.service.UpsertProfile(ctx, protoToUpsertProfileDTO(req))
+	p, err := s.service.UpsertProfile(ctx, protoToUpsertProfile(req))
 	if err != nil {
 		return nil, err
 	}
-	return &profilepb.ProfileResponse{Profile: dtoToProtoProfile(p)}, nil
+	return &profilepb.ProfileResponse{Profile: domainToProtoProfile(p)}, nil
 }
 
 func (s *ProfileServer) IsProfileComplete(ctx context.Context, req *profilepb.IsProfileCompleteRequest) (*profilepb.IsProfileCompleteResponse, error) {
@@ -43,14 +41,12 @@ func (s *ProfileServer) IsProfileComplete(ctx context.Context, req *profilepb.Is
 	return &profilepb.IsProfileCompleteResponse{Complete: complete}, nil
 }
 
-// ─── management companies ─────────────────────────────────────────────────────
-
 func (s *ProfileServer) CreateManagementCompany(ctx context.Context, req *profilepb.CreateManagementCompanyRequest) (*profilepb.ManagementCompanyResponse, error) {
-	c, err := s.service.CreateManagementCompany(ctx, protoToCreateCompanyDTO(req))
+	c, err := s.service.CreateManagementCompany(ctx, protoToCreateCompany(req))
 	if err != nil {
 		return nil, err
 	}
-	return &profilepb.ManagementCompanyResponse{Company: dtoToProtoCompany(c)}, nil
+	return &profilepb.ManagementCompanyResponse{Company: domainToProtoCompany(c)}, nil
 }
 
 func (s *ProfileServer) ListManagementCompanies(ctx context.Context, _ *profilepb.ListManagementCompaniesRequest) (*profilepb.ListManagementCompaniesResponse, error) {
@@ -60,29 +56,27 @@ func (s *ProfileServer) ListManagementCompanies(ctx context.Context, _ *profilep
 	}
 	pb := make([]*profilepb.ManagementCompany, 0, len(companies))
 	for _, c := range companies {
-		pb = append(pb, dtoToProtoCompany(c))
+		pb = append(pb, domainToProtoCompany(c))
 	}
 	return &profilepb.ListManagementCompaniesResponse{Companies: pb}, nil
 }
 
-// ─── houses ───────────────────────────────────────────────────────────────────
-
 func (s *ProfileServer) CreateHouse(ctx context.Context, req *profilepb.CreateHouseRequest) (*profilepb.HouseResponse, error) {
-	h, err := s.service.CreateHouse(ctx, protoToCreateHouseDTO(req))
+	h, err := s.service.CreateHouse(ctx, protoToCreateHouse(req))
 	if err != nil {
 		return nil, err
 	}
-	return &profilepb.HouseResponse{House: dtoToProtoHouse(h)}, nil
+	return &profilepb.HouseResponse{House: domainToProtoHouse(h)}, nil
 }
 
 func (s *ProfileServer) ListHouses(ctx context.Context, req *profilepb.ListHousesRequest) (*profilepb.ListHousesResponse, error) {
-	houses, err := s.service.ListHouses(ctx, protoToListHousesDTO(req))
+	houses, err := s.service.ListHouses(ctx, protoToListHouses(req))
 	if err != nil {
 		return nil, err
 	}
 	pb := make([]*profilepb.House, 0, len(houses))
 	for _, h := range houses {
-		pb = append(pb, dtoToProtoHouse(h))
+		pb = append(pb, domainToProtoHouse(h))
 	}
 	return &profilepb.ListHousesResponse{Houses: pb}, nil
 }

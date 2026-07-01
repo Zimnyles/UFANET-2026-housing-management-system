@@ -1,11 +1,18 @@
 FROM golang:1.25-alpine AS build
 
-WORKDIR /src
+WORKDIR /workspace
 
-COPY go.mod go.sum ./
+COPY contracts/go.mod contracts/go.sum ./contracts/
+
+COPY auth-microservice/go.mod auth-microservice/go.sum ./auth-microservice/
+WORKDIR /workspace/auth-microservice
 RUN go mod download
 
-COPY . .
+WORKDIR /workspace
+COPY contracts/ ./contracts/
+COPY auth-microservice/ ./auth-microservice/
+
+WORKDIR /workspace/auth-microservice
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/srv ./cmd
 
 # ---

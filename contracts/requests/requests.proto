@@ -1,0 +1,87 @@
+syntax = "proto3";
+
+package requests;
+
+option go_package = "contracts/requests;requests";
+
+service RequestsService {
+  rpc CreateRequest(CreateRequestRequest)   returns (RequestResponse);
+  rpc GetRequests(GetRequestsRequest)       returns (GetRequestsResponse);
+  rpc GetRequest(GetRequestRequest)         returns (RequestResponse);
+  rpc UpdateRequestStatus(UpdateStatusRequest) returns (RequestResponse);
+  rpc AddComment(AddCommentRequest)         returns (CommentResponse);
+  rpc GetComments(GetCommentsRequest)       returns (GetCommentsResponse);
+}
+
+// ─── request ──────────────────────────────────────────────────────────────────
+
+message MaintenanceRequest {
+  string id          = 1;
+  string title       = 2;
+  string description = 3;
+  string type        = 4; // plumber | electrician
+  string status      = 5; // open | in_progress | done | cancelled
+  string user_id     = 6;
+  string created_at  = 7; // RFC3339
+  string updated_at  = 8; // RFC3339
+}
+
+message Comment {
+  string id         = 1;
+  string request_id = 2;
+  string user_id    = 3;
+  string content    = 4;
+  string created_at = 5; // RFC3339
+}
+
+message CreateRequestRequest {
+  string title       = 1;
+  string description = 2;
+  string type        = 3;
+  string user_id     = 4;
+}
+
+message GetRequestsRequest {
+  string user_id    = 1; // фильтр по автору (для жителя — свой)
+  string status     = 2; // фильтр по статусу
+  string type       = 3; // фильтр по типу
+  int32  limit      = 4; // пагинация, default 20
+  int32  offset     = 5; // пагинация, default 0
+}
+
+message GetRequestRequest {
+  string id = 1;
+}
+
+message UpdateStatusRequest {
+  string id     = 1;
+  string status = 2;
+  string user_id = 3; // кто меняет (для аудит-лога)
+}
+
+message AddCommentRequest {
+  string request_id = 1;
+  string user_id    = 2;
+  string content    = 3;
+}
+
+message GetCommentsRequest {
+  string request_id = 1;
+}
+
+message RequestResponse {
+  MaintenanceRequest request = 1;
+}
+
+message GetRequestsResponse {
+  repeated MaintenanceRequest requests = 1;
+  int32                       total    = 2;
+}
+
+message CommentResponse {
+  Comment comment = 1;
+}
+
+message GetCommentsResponse {
+  repeated Comment comments = 1;
+}

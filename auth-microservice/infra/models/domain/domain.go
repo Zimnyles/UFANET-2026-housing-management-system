@@ -10,12 +10,15 @@ type TokenClaims struct {
 }
 
 type User struct {
-	ID           string
-	Name         string
-	Email        string
-	PasswordHash string
-	Role         string
-	CreatedAt    time.Time
+	ID           string    `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Email        string    `gorm:"uniqueIndex;not null"`
+	PasswordHash string    `gorm:"column:password;not null"`
+	Role         string    `gorm:"not null;default:user"`
+	CreatedAt    time.Time `gorm:"not null"`
+}
+
+func (User) TableName() string {
+	return "users"
 }
 
 type RefreshToken struct {
@@ -26,10 +29,19 @@ type RefreshToken struct {
 }
 
 type RegisterRequest struct {
-	Name      string
 	Email     string
 	Password  string
 	AdminCode string
+}
+
+type AuthResult struct {
+	UserID       string
+	AccessToken  string
+	RefreshToken string
+}
+
+type RefreshResult struct {
+	AccessToken string
 }
 
 type LoginRequest struct {

@@ -6,6 +6,7 @@ import (
 
 	"api-gateway/resources"
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/rs/zerolog"
 )
@@ -35,6 +36,11 @@ func New(ctx context.Context, res *resources.Resources, app *fiber.App) *Middlew
 }
 
 func (mw *Middlewares) SetGlobalMiddlewares() {
+	mw.app.Use(cors.New(cors.Config{
+		AllowOrigins: "*",
+		AllowMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
+		AllowHeaders: "Origin,Content-Type,Accept,Authorization",
+	}))
 	mw.app.Use(func(c *fiber.Ctx) error {
 		reqCtx, cancel := context.WithCancel(mw.ctx)
 		defer cancel()

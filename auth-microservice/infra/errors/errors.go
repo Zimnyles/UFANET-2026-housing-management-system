@@ -13,9 +13,6 @@ var (
 )
 
 var (
-	ErrNameRequired     = errors.New("name is required")
-	ErrNameTooShort     = errors.New("name min length 2")
-	ErrNameTooLong      = errors.New("name max length 100")
 	ErrEmailRequired    = errors.New("email is required")
 	ErrEmailInvalid     = errors.New("invalid email format")
 	ErrPasswordRequired = errors.New("password is required")

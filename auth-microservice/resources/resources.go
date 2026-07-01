@@ -8,9 +8,10 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 type Resources struct {
@@ -58,16 +59,20 @@ func InitResources(ctx context.Context) (*Resources, error) {
 	logger := initLogger(env.ServiceName, env.LogLevel)
 	logger.Info().Str("addr", env.Addr()).Msg("env loaded")
 
-	pool, err := pgxpool.New(ctx, env.DSN())
+	db, err := gorm.Open(postgres.Open(env.DSN()), &gorm.Config{TranslateError: true})
 	if err != nil {
 		return nil, fmt.Errorf("connect postgres: %w", err)
 	}
-	if err := pool.Ping(ctx); err != nil {
+	sqlDB, err := db.DB()
+	if err != nil {
+		return nil, fmt.Errorf("postgres handle: %w", err)
+	}
+	if err := sqlDB.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
 	logger.Info().Str("host", env.PostgresHost).Int("port", env.PostgresPort).Msg("postgres connected")
 
-	repository := repo.New(pool)
+	repository := repo.New(db)
 	if err := repository.Migrate(ctx); err != nil {
 		return nil, fmt.Errorf("migrate: %w", err)
 	}

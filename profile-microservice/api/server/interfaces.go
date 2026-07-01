@@ -2,17 +2,17 @@ package server
 
 import (
 	"context"
-	"profile-service/infra/models/dto"
+	"profile-service/infra/models/domain"
 )
 
 type ProfileService interface {
-	GetProfile(ctx context.Context, userID string) (*dto.Profile, error)
-	UpsertProfile(ctx context.Context, req *dto.UpsertProfileRequest) (*dto.Profile, error)
+	GetProfile(ctx context.Context, userID string) (*domain.Profile, error)
+	UpsertProfile(ctx context.Context, req *domain.UpsertProfileRequest) (*domain.Profile, error)
 	IsProfileComplete(ctx context.Context, userID string) (bool, error)
 
-	CreateManagementCompany(ctx context.Context, req *dto.CreateManagementCompanyRequest) (*dto.ManagementCompany, error)
-	ListManagementCompanies(ctx context.Context) ([]*dto.ManagementCompany, error)
+	CreateManagementCompany(ctx context.Context, req *domain.CreateManagementCompanyRequest) (*domain.ManagementCompany, error)
+	ListManagementCompanies(ctx context.Context) ([]*domain.ManagementCompany, error)
 
-	CreateHouse(ctx context.Context, req *dto.CreateHouseRequest) (*dto.House, error)
-	ListHouses(ctx context.Context, req *dto.ListHousesRequest) ([]*dto.House, error)
+	CreateHouse(ctx context.Context, req *domain.CreateHouseRequest) (*domain.House, error)
+	ListHouses(ctx context.Context, req *domain.ListHousesRequest) ([]*domain.House, error)
 }

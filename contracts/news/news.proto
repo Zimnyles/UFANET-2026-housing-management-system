@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package news;
+
+option go_package = "contracts/news;news";
+
+service NewsService {
+  rpc CreateNews(CreateNewsRequest)      returns (NewsResponse);
+  rpc GetNews(GetNewsRequest)            returns (GetNewsResponse);
+  rpc GetNewsItem(GetNewsItemRequest)    returns (NewsResponse);
+}
+
+// ─── news ─────────────────────────────────────────────────────────────────────
+
+message News {
+  string id        = 1;
+  string title     = 2;
+  string content   = 3;
+  string house_id  = 4;
+  string created_at = 5; // RFC3339
+}
+
+message CreateNewsRequest {
+  string title    = 1;
+  string content  = 2;
+  string house_id = 3;
+}
+
+message GetNewsRequest {
+  string house_id  = 1; // фильтр по дому
+  string date_from = 2; // RFC3339, не обязательно
+  string date_to   = 3; // RFC3339, не обязательно
+  int32  limit     = 4; // пагинация, default 20
+  int32  offset    = 5; // пагинация, default 0
+}
+
+message GetNewsResponse {
+  repeated News news     = 1;
+  int32         total    = 2;
+}
+
+message GetNewsItemRequest {
+  string id = 1;
+}
+
+message NewsResponse {
+  News news = 1;
+}

@@ -3,7 +3,6 @@ package auth
 import (
 	infra_errors "auth-service/infra/errors"
 	"auth-service/infra/models/domain"
-	"auth-service/infra/models/dto"
 	"context"
 	"fmt"
 
@@ -26,9 +25,7 @@ func New(repo Repository, jwt JWTManager, hasher Hasher, logger *zerolog.Logger)
 	}
 }
 
-func (s *AuthService) Register(ctx context.Context, d *dto.RegisterRequest) (*dto.AuthResult, error) {
-	req := domain.ConvertFromDTOToRegisterRequest(d)
-
+func (s *AuthService) Register(ctx context.Context, req *domain.RegisterRequest) (*domain.AuthResult, error) {
 	role := "user"
 	if req.AdminCode != "" {
 		active, err := s.repo.IsActiveAdminCode(ctx, req.AdminCode)
@@ -48,7 +45,6 @@ func (s *AuthService) Register(ctx context.Context, d *dto.RegisterRequest) (*dt
 	}
 
 	user, err := s.repo.CreateUser(ctx, &domain.User{
-		Name:         req.Name,
 		Email:        req.Email,
 		PasswordHash: passwordHash,
 		Role:         role,
@@ -61,9 +57,7 @@ func (s *AuthService) Register(ctx context.Context, d *dto.RegisterRequest) (*dt
 	return s.issueTokens(user)
 }
 
-func (s *AuthService) Login(ctx context.Context, d *dto.LoginRequest) (*dto.AuthResult, error) {
-	req := domain.ConvertFromDTOToLoginRequest(d)
-
+func (s *AuthService) Login(ctx context.Context, req *domain.LoginRequest) (*domain.AuthResult, error) {
 	user, err := s.repo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		s.logger.Error().Err(err).Str("email", req.Email).Msg("login: get user failed")
@@ -77,9 +71,7 @@ func (s *AuthService) Login(ctx context.Context, d *dto.LoginRequest) (*dto.Auth
 	return s.issueTokens(user)
 }
 
-func (s *AuthService) Refresh(ctx context.Context, d *dto.RefreshRequest) (*dto.RefreshResult, error) {
-	req := domain.ConvertFromDTOToRefreshRequest(d)
-
+func (s *AuthService) Refresh(ctx context.Context, req *domain.RefreshRequest) (*domain.RefreshResult, error) {
 	tokenClaims, err := s.jwt.ParseRefresh(req.RefreshToken)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("refresh: invalid token")
@@ -92,14 +84,14 @@ func (s *AuthService) Refresh(ctx context.Context, d *dto.RefreshRequest) (*dto.
 	}
 
 	s.logger.Info().Str("user_id", tokenClaims.UserID).Msg("token refreshed")
-	return &dto.RefreshResult{AccessToken: accessToken}, nil
+	return &domain.RefreshResult{AccessToken: accessToken}, nil
 }
 
-func (s *AuthService) Logout(_ context.Context, _ *dto.LogoutRequest) error {
+func (s *AuthService) Logout(_ context.Context, _ *domain.LogoutRequest) error {
 	return nil
 }
 
-func (s *AuthService) issueTokens(user *domain.User) (*dto.AuthResult, error) {
+func (s *AuthService) issueTokens(user *domain.User) (*domain.AuthResult, error) {
 	accessToken, err := s.jwt.GenerateAccess(user.ID, user.Role)
 	if err != nil {
 		return nil, fmt.Errorf("generate access token: %w", err)
@@ -111,7 +103,7 @@ func (s *AuthService) issueTokens(user *domain.User) (*dto.AuthResult, error) {
 	}
 
 	s.logger.Info().Str("user_id", user.ID).Msg("tokens issued")
-	return &dto.AuthResult{
+	return &domain.AuthResult{
 		UserID:       user.ID,
 		AccessToken:  accessToken,
 		RefreshToken: refreshToken,

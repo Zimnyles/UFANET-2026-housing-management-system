@@ -16,9 +16,6 @@ var errCodeMap = map[error]codes.Code{
 	infra_errors.ErrTokenExpired:       codes.Unauthenticated,
 	infra_errors.ErrTokenNotFound:      codes.Unauthenticated,
 
-	infra_errors.ErrNameRequired:     codes.InvalidArgument,
-	infra_errors.ErrNameTooShort:     codes.InvalidArgument,
-	infra_errors.ErrNameTooLong:      codes.InvalidArgument,
 	infra_errors.ErrEmailRequired:    codes.InvalidArgument,
 	infra_errors.ErrEmailInvalid:     codes.InvalidArgument,
 	infra_errors.ErrPasswordRequired: codes.InvalidArgument,

@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"profile-service/infra/models/domain"
-	"profile-service/infra/models/dto"
 
 	"github.com/rs/zerolog"
 )
@@ -18,25 +17,22 @@ func New(repo Repository, logger *zerolog.Logger) *ProfileService {
 	return &ProfileService{repo: repo, logger: logger}
 }
 
-// ─── profile ──────────────────────────────────────────────────────────────────
-
-func (s *ProfileService) GetProfile(ctx context.Context, userID string) (*dto.Profile, error) {
+func (s *ProfileService) GetProfile(ctx context.Context, userID string) (*domain.Profile, error) {
 	p, err := s.repo.GetProfile(ctx, userID)
 	if err != nil {
 		s.logger.Error().Err(err).Str("user_id", userID).Msg("get profile failed")
 		return nil, err
 	}
-	return domain.ProfileToDTO(p), nil
+	return p, nil
 }
 
-func (s *ProfileService) UpsertProfile(ctx context.Context, req *dto.UpsertProfileRequest) (*dto.Profile, error) {
-	domReq := domain.UpsertProfileRequestFromDTO(req)
+func (s *ProfileService) UpsertProfile(ctx context.Context, req *domain.UpsertProfileRequest) (*domain.Profile, error) {
 	profile := &domain.Profile{
-		UserID:    domReq.UserID,
-		FullName:  domReq.FullName,
-		Phone:     domReq.Phone,
-		Apartment: domReq.Apartment,
-		HouseID:   domReq.HouseID,
+		UserID:    req.UserID,
+		FullName:  req.FullName,
+		Phone:     req.Phone,
+		Apartment: req.Apartment,
+		HouseID:   req.HouseID,
 	}
 	p, err := s.repo.UpsertProfile(ctx, profile)
 	if err != nil {
@@ -44,7 +40,7 @@ func (s *ProfileService) UpsertProfile(ctx context.Context, req *dto.UpsertProfi
 		return nil, fmt.Errorf("upsert profile: %w", err)
 	}
 	s.logger.Info().Str("user_id", req.UserID).Msg("profile upserted")
-	return domain.ProfileToDTO(p), nil
+	return p, nil
 }
 
 func (s *ProfileService) IsProfileComplete(ctx context.Context, userID string) (bool, error) {
@@ -55,33 +51,21 @@ func (s *ProfileService) IsProfileComplete(ctx context.Context, userID string) (
 	return complete, nil
 }
 
-// ─── management companies ─────────────────────────────────────────────────────
-
-func (s *ProfileService) CreateManagementCompany(ctx context.Context, req *dto.CreateManagementCompanyRequest) (*dto.ManagementCompany, error) {
-	c, err := s.repo.CreateManagementCompany(ctx, req.Name)
+func (s *ProfileService) CreateManagementCompany(ctx context.Context, req *domain.CreateManagementCompanyRequest) (*domain.ManagementCompany, error) {
+	c, err := s.repo.CreateManagementCompany(ctx, &domain.ManagementCompany{Name: req.Name})
 	if err != nil {
 		s.logger.Error().Err(err).Str("name", req.Name).Msg("create management company failed")
 		return nil, fmt.Errorf("create management company: %w", err)
 	}
 	s.logger.Info().Str("id", c.ID).Str("name", c.Name).Msg("management company created")
-	return domain.ManagementCompanyToDTO(c), nil
+	return c, nil
 }
 
-func (s *ProfileService) ListManagementCompanies(ctx context.Context) ([]*dto.ManagementCompany, error) {
-	companies, err := s.repo.ListManagementCompanies(ctx)
-	if err != nil {
-		return nil, err
-	}
-	result := make([]*dto.ManagementCompany, 0, len(companies))
-	for _, c := range companies {
-		result = append(result, domain.ManagementCompanyToDTO(c))
-	}
-	return result, nil
+func (s *ProfileService) ListManagementCompanies(ctx context.Context) ([]*domain.ManagementCompany, error) {
+	return s.repo.ListManagementCompanies(ctx)
 }
 
-// ─── houses ───────────────────────────────────────────────────────────────────
-
-func (s *ProfileService) CreateHouse(ctx context.Context, req *dto.CreateHouseRequest) (*dto.House, error) {
+func (s *ProfileService) CreateHouse(ctx context.Context, req *domain.CreateHouseRequest) (*domain.House, error) {
 	h, err := s.repo.CreateHouse(ctx, &domain.House{
 		Name:    req.Name,
 		Address: req.Address,
@@ -92,17 +76,9 @@ func (s *ProfileService) CreateHouse(ctx context.Context, req *dto.CreateHouseRe
 		return nil, fmt.Errorf("create house: %w", err)
 	}
 	s.logger.Info().Str("id", h.ID).Str("name", h.Name).Msg("house created")
-	return domain.HouseToDTO(h), nil
+	return h, nil
 }
 
-func (s *ProfileService) ListHouses(ctx context.Context, req *dto.ListHousesRequest) ([]*dto.House, error) {
-	houses, err := s.repo.ListHouses(ctx, req.UKID)
-	if err != nil {
-		return nil, err
-	}
-	result := make([]*dto.House, 0, len(houses))
-	for _, h := range houses {
-		result = append(result, domain.HouseToDTO(h))
-	}
-	return result, nil
+func (s *ProfileService) ListHouses(ctx context.Context, req *domain.ListHousesRequest) ([]*domain.House, error) {
+	return s.repo.ListHouses(ctx, req.UKID)
 }

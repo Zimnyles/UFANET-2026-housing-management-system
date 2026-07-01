@@ -11,6 +11,6 @@ EOSQL
 }
 
 create_db "auth"
-# create_db "news"
-# create_db "requests"
+create_db "profile"
+create_db "requests"
 # create_db "notifications"

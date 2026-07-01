@@ -8,8 +8,6 @@ import (
 	app_errors "api-gateway/internal/errors"
 )
 
-// ─── profile ──────────────────────────────────────────────────────────────────
-
 func (c *ProfileClient) GetProfile(ctx context.Context, userID string) (*domain.Profile, error) {
 	resp, err := c.client.GetProfile(ctx, toProtoGetProfileRequest(userID))
 	if err != nil {
@@ -34,8 +32,6 @@ func (c *ProfileClient) IsProfileComplete(ctx context.Context, userID string) (b
 	return resp.GetComplete(), nil
 }
 
-// ─── management companies ─────────────────────────────────────────────────────
-
 func (c *ProfileClient) CreateManagementCompany(ctx context.Context, req *domain.CreateManagementCompanyRequest) (*domain.ManagementCompany, error) {
 	resp, err := c.client.CreateManagementCompany(ctx, toProtoCreateManagementCompanyRequest(req))
 	if err != nil {
@@ -55,8 +51,6 @@ func (c *ProfileClient) ListManagementCompanies(ctx context.Context) ([]*domain.
 	}
 	return result, nil
 }
-
-// ─── houses ───────────────────────────────────────────────────────────────────
 
 func (c *ProfileClient) CreateHouse(ctx context.Context, req *domain.CreateHouseRequest) (*domain.House, error) {
 	resp, err := c.client.CreateHouse(ctx, toProtoCreateHouseRequest(req))

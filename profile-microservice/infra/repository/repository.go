@@ -4,203 +4,186 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
 
 	infra_errors "profile-service/infra/errors"
 	"profile-service/infra/models/domain"
 
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type Repository struct {
-	pool *pgxpool.Pool
+	db *gorm.DB
 }
 
-func New(pool *pgxpool.Pool) *Repository {
-	return &Repository{pool: pool}
+type dbManagementCompany struct {
+	ID        string    `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name      string    `gorm:"uniqueIndex;not null"`
+	CreatedAt time.Time `gorm:"not null"`
+}
+
+func (dbManagementCompany) TableName() string {
+	return "management_companies"
+}
+
+type dbHouse struct {
+	ID        string    `gorm:"type:uuid;default:gen_random_uuid();primaryKey"`
+	Name      string    `gorm:"not null"`
+	Address   string    `gorm:"not null"`
+	UKID      string    `gorm:"column:uk_id;type:uuid;not null"`
+	CreatedAt time.Time `gorm:"not null"`
+}
+
+func (dbHouse) TableName() string {
+	return "houses"
+}
+
+type dbProfile struct {
+	UserID    string    `gorm:"column:user_id;type:uuid;primaryKey"`
+	FullName  string    `gorm:"not null;default:''"`
+	Phone     string    `gorm:"not null;default:''"`
+	Apartment string    `gorm:"not null;default:''"`
+	HouseID   string    `gorm:"column:house_id;type:uuid"`
+	UKID      string    `gorm:"column:uk_id;type:uuid"`
+	CreatedAt time.Time `gorm:"not null"`
+	UpdatedAt time.Time `gorm:"not null"`
+}
+
+func (dbProfile) TableName() string {
+	return "profiles"
+}
+
+func New(db *gorm.DB) *Repository {
+	return &Repository{db: db}
 }
 
 func (r *Repository) Migrate(ctx context.Context) error {
-	_, err := r.pool.Exec(ctx, `
-		CREATE TABLE IF NOT EXISTS management_companies (
-			id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-			name       TEXT NOT NULL UNIQUE,
-			created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-		);
-
-		CREATE TABLE IF NOT EXISTS houses (
-			id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-			name       TEXT NOT NULL,
-			address    TEXT NOT NULL,
-			uk_id      UUID NOT NULL REFERENCES management_companies(id),
-			created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-		);
-
-		CREATE TABLE IF NOT EXISTS profiles (
-			user_id    UUID PRIMARY KEY,
-			full_name  TEXT NOT NULL DEFAULT '',
-			phone      TEXT NOT NULL DEFAULT '',
-			apartment  TEXT NOT NULL DEFAULT '',
-			house_id   UUID REFERENCES houses(id),
-			uk_id      UUID REFERENCES management_companies(id),
-			created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
-			updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
-		);
-	`)
-	if err != nil {
-		return fmt.Errorf("migrate: %w", err)
+	if err := r.db.WithContext(ctx).AutoMigrate(&dbManagementCompany{}, &dbHouse{}, &dbProfile{}); err != nil {
+		return fmt.Errorf("auto migrate: %w", err)
 	}
 	return nil
 }
 
-// ─── profile ──────────────────────────────────────────────────────────────────
-
 func (r *Repository) GetProfile(ctx context.Context, userID string) (*domain.Profile, error) {
-	var p domain.Profile
-	err := r.pool.QueryRow(ctx,
-		`SELECT user_id, full_name, phone, apartment,
-		        COALESCE(house_id::text, ''), COALESCE(uk_id::text, ''),
-		        created_at, updated_at
-		 FROM profiles WHERE user_id = $1`,
-		userID,
-	).Scan(&p.UserID, &p.FullName, &p.Phone, &p.Apartment, &p.HouseID, &p.UKID, &p.CreatedAt, &p.UpdatedAt)
-	if err != nil {
-		if errors.Is(err, pgx.ErrNoRows) {
+	var p dbProfile
+	if err := r.db.WithContext(ctx).Where("user_id = ?", userID).First(&p).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, infra_errors.ErrProfileNotFound
 		}
 		return nil, fmt.Errorf("get profile: %w", err)
 	}
-	return &p, nil
+	return profileToDomain(&p), nil
 }
 
 func (r *Repository) UpsertProfile(ctx context.Context, profile *domain.Profile) (*domain.Profile, error) {
-	var p domain.Profile
-	var houseID *string
-	if profile.HouseID != "" {
-		houseID = &profile.HouseID
+	db := r.db.WithContext(ctx)
+	var house dbHouse
+	if err := db.Where("id = ?", profile.HouseID).First(&house).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, infra_errors.ErrHouseIDInvalid
+		}
+		return nil, fmt.Errorf("get house: %w", err)
 	}
 
-	// uk_id подтягивается из house
-	err := r.pool.QueryRow(ctx,
-		`INSERT INTO profiles (user_id, full_name, phone, apartment, house_id, uk_id)
-		 VALUES ($1, $2, $3, $4, $5,
-		   (SELECT uk_id FROM houses WHERE id = $5))
-		 ON CONFLICT (user_id) DO UPDATE SET
-		   full_name  = EXCLUDED.full_name,
-		   phone      = EXCLUDED.phone,
-		   apartment  = EXCLUDED.apartment,
-		   house_id   = EXCLUDED.house_id,
-		   uk_id      = EXCLUDED.uk_id,
-		   updated_at = now()
-		 RETURNING user_id, full_name, phone, apartment,
-		           COALESCE(house_id::text, ''), COALESCE(uk_id::text, ''),
-		           created_at, updated_at`,
-		profile.UserID, profile.FullName, profile.Phone, profile.Apartment, houseID,
-	).Scan(&p.UserID, &p.FullName, &p.Phone, &p.Apartment, &p.HouseID, &p.UKID, &p.CreatedAt, &p.UpdatedAt)
-	if err != nil {
+	p := dbProfile{
+		UserID:    profile.UserID,
+		FullName:  profile.FullName,
+		Phone:     profile.Phone,
+		Apartment: profile.Apartment,
+		HouseID:   house.ID,
+		UKID:      house.UKID,
+	}
+
+	if err := db.Clauses(clause.OnConflict{
+		Columns: []clause.Column{{Name: "user_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{
+			"full_name",
+			"phone",
+			"apartment",
+			"house_id",
+			"uk_id",
+			"updated_at",
+		}),
+	}).Create(&p).Error; err != nil {
 		return nil, fmt.Errorf("upsert profile: %w", err)
 	}
-	return &p, nil
+
+	return r.GetProfile(ctx, profile.UserID)
 }
 
 func (r *Repository) IsProfileComplete(ctx context.Context, userID string) (bool, error) {
-	var complete bool
-	err := r.pool.QueryRow(ctx,
-		`SELECT EXISTS(
-			SELECT 1 FROM profiles
-			WHERE user_id = $1
-			  AND full_name <> ''
-			  AND phone     <> ''
-			  AND apartment <> ''
-			  AND house_id IS NOT NULL
-		)`,
-		userID,
-	).Scan(&complete)
-	if err != nil {
+	var count int64
+	if err := r.db.WithContext(ctx).
+		Model(&dbProfile{}).
+		Where("user_id = ? AND full_name <> '' AND phone <> '' AND apartment <> '' AND house_id <> ''", userID).
+		Count(&count).Error; err != nil {
 		return false, fmt.Errorf("is profile complete: %w", err)
 	}
-	return complete, nil
+	return count > 0, nil
 }
 
-// ─── management companies ─────────────────────────────────────────────────────
-
-func (r *Repository) CreateManagementCompany(ctx context.Context, name string) (*domain.ManagementCompany, error) {
-	var c domain.ManagementCompany
-	err := r.pool.QueryRow(ctx,
-		`INSERT INTO management_companies (name)
-		 VALUES ($1)
-		 RETURNING id, name`,
-		name,
-	).Scan(&c.ID, &c.Name)
-	if err != nil {
+func (r *Repository) CreateManagementCompany(ctx context.Context, company *domain.ManagementCompany) (*domain.ManagementCompany, error) {
+	c := dbManagementCompany{Name: company.Name}
+	if err := r.db.WithContext(ctx).Create(&c).Error; err != nil {
 		return nil, fmt.Errorf("create management company: %w", err)
 	}
-	return &c, nil
+	return companyToDomain(&c), nil
 }
 
 func (r *Repository) ListManagementCompanies(ctx context.Context) ([]*domain.ManagementCompany, error) {
-	rows, err := r.pool.Query(ctx,
-		`SELECT id, name FROM management_companies ORDER BY name`,
-	)
-	if err != nil {
+	var companies []dbManagementCompany
+	if err := r.db.WithContext(ctx).Order("name").Find(&companies).Error; err != nil {
 		return nil, fmt.Errorf("list management companies: %w", err)
 	}
-	defer rows.Close()
-
-	var companies []*domain.ManagementCompany
-	for rows.Next() {
-		var c domain.ManagementCompany
-		if err := rows.Scan(&c.ID, &c.Name); err != nil {
-			return nil, fmt.Errorf("scan management company: %w", err)
-		}
-		companies = append(companies, &c)
+	result := make([]*domain.ManagementCompany, 0, len(companies))
+	for i := range companies {
+		result = append(result, companyToDomain(&companies[i]))
 	}
-	return companies, nil
+	return result, nil
 }
 
-// ─── houses ───────────────────────────────────────────────────────────────────
-
 func (r *Repository) CreateHouse(ctx context.Context, house *domain.House) (*domain.House, error) {
-	var h domain.House
-	err := r.pool.QueryRow(ctx,
-		`INSERT INTO houses (name, address, uk_id)
-		 VALUES ($1, $2, $3)
-		 RETURNING id, name, address, uk_id::text`,
-		house.Name, house.Address, house.UKID,
-	).Scan(&h.ID, &h.Name, &h.Address, &h.UKID)
-	if err != nil {
+	h := dbHouse{Name: house.Name, Address: house.Address, UKID: house.UKID}
+	if err := r.db.WithContext(ctx).Create(&h).Error; err != nil {
 		return nil, fmt.Errorf("create house: %w", err)
 	}
-	return &h, nil
+	return houseToDomain(&h), nil
 }
 
 func (r *Repository) ListHouses(ctx context.Context, ukID string) ([]*domain.House, error) {
-	var (
-		rows pgx.Rows
-		err  error
-	)
+	var houses []dbHouse
+	query := r.db.WithContext(ctx)
 	if ukID != "" {
-		rows, err = r.pool.Query(ctx,
-			`SELECT id, name, address, uk_id::text FROM houses WHERE uk_id = $1 ORDER BY name`,
-			ukID,
-		)
-	} else {
-		rows, err = r.pool.Query(ctx,
-			`SELECT id, name, address, uk_id::text FROM houses ORDER BY name`,
-		)
+		query = query.Where("uk_id = ?", ukID)
 	}
-	if err != nil {
+	if err := query.Order("name").Find(&houses).Error; err != nil {
 		return nil, fmt.Errorf("list houses: %w", err)
 	}
-	defer rows.Close()
-
-	var houses []*domain.House
-	for rows.Next() {
-		var h domain.House
-		if err := rows.Scan(&h.ID, &h.Name, &h.Address, &h.UKID); err != nil {
-			return nil, fmt.Errorf("scan house: %w", err)
-		}
-		houses = append(houses, &h)
+	result := make([]*domain.House, 0, len(houses))
+	for i := range houses {
+		result = append(result, houseToDomain(&houses[i]))
 	}
-	return houses, nil
+	return result, nil
+}
+
+func profileToDomain(p *dbProfile) *domain.Profile {
+	return &domain.Profile{
+		UserID:    p.UserID,
+		FullName:  p.FullName,
+		Phone:     p.Phone,
+		Apartment: p.Apartment,
+		HouseID:   p.HouseID,
+		UKID:      p.UKID,
+		CreatedAt: p.CreatedAt,
+		UpdatedAt: p.UpdatedAt,
+	}
+}
+
+func companyToDomain(c *dbManagementCompany) *domain.ManagementCompany {
+	return &domain.ManagementCompany{ID: c.ID, Name: c.Name}
+}
+
+func houseToDomain(h *dbHouse) *domain.House {
+	return &domain.House{ID: h.ID, Name: h.Name, Address: h.Address, UKID: h.UKID}
 }

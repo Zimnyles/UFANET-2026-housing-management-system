@@ -8,15 +8,6 @@ import (
 )
 
 func ValidateRegisterRequest(req *authpb.RegisterRequest) error {
-	if req.GetName() == "" {
-		return infra_errors.ErrNameRequired
-	}
-	if len(req.GetName()) < 2 {
-		return infra_errors.ErrNameTooShort
-	}
-	if len(req.GetName()) > 100 {
-		return infra_errors.ErrNameTooLong
-	}
 	if req.GetEmail() == "" {
 		return infra_errors.ErrEmailRequired
 	}

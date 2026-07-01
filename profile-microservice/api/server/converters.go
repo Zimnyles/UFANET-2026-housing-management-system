@@ -1,15 +1,13 @@
 package server
 
 import (
-	"profile-service/infra/models/dto"
+	"profile-service/infra/models/domain"
 
 	profilepb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/profile/langs/go"
 )
 
-// ─── inbound: proto → dto ─────────────────────────────────────────────────────
-
-func protoToUpsertProfileDTO(req *profilepb.UpsertProfileRequest) *dto.UpsertProfileRequest {
-	return &dto.UpsertProfileRequest{
+func protoToUpsertProfile(req *profilepb.UpsertProfileRequest) *domain.UpsertProfileRequest {
+	return &domain.UpsertProfileRequest{
 		UserID:    req.GetUserId(),
 		FullName:  req.GetFullName(),
 		Phone:     req.GetPhone(),
@@ -18,25 +16,23 @@ func protoToUpsertProfileDTO(req *profilepb.UpsertProfileRequest) *dto.UpsertPro
 	}
 }
 
-func protoToCreateCompanyDTO(req *profilepb.CreateManagementCompanyRequest) *dto.CreateManagementCompanyRequest {
-	return &dto.CreateManagementCompanyRequest{Name: req.GetName()}
+func protoToCreateCompany(req *profilepb.CreateManagementCompanyRequest) *domain.CreateManagementCompanyRequest {
+	return &domain.CreateManagementCompanyRequest{Name: req.GetName()}
 }
 
-func protoToCreateHouseDTO(req *profilepb.CreateHouseRequest) *dto.CreateHouseRequest {
-	return &dto.CreateHouseRequest{
+func protoToCreateHouse(req *profilepb.CreateHouseRequest) *domain.CreateHouseRequest {
+	return &domain.CreateHouseRequest{
 		Name:    req.GetName(),
 		Address: req.GetAddress(),
 		UKID:    req.GetUkId(),
 	}
 }
 
-func protoToListHousesDTO(req *profilepb.ListHousesRequest) *dto.ListHousesRequest {
-	return &dto.ListHousesRequest{UKID: req.GetUkId()}
+func protoToListHouses(req *profilepb.ListHousesRequest) *domain.ListHousesRequest {
+	return &domain.ListHousesRequest{UKID: req.GetUkId()}
 }
 
-// ─── outbound: dto → proto ────────────────────────────────────────────────────
-
-func dtoToProtoProfile(p *dto.Profile) *profilepb.Profile {
+func domainToProtoProfile(p *domain.Profile) *profilepb.Profile {
 	return &profilepb.Profile{
 		UserId:    p.UserID,
 		FullName:  p.FullName,
@@ -47,11 +43,11 @@ func dtoToProtoProfile(p *dto.Profile) *profilepb.Profile {
 	}
 }
 
-func dtoToProtoCompany(c *dto.ManagementCompany) *profilepb.ManagementCompany {
+func domainToProtoCompany(c *domain.ManagementCompany) *profilepb.ManagementCompany {
 	return &profilepb.ManagementCompany{Id: c.ID, Name: c.Name}
 }
 
-func dtoToProtoHouse(h *dto.House) *profilepb.House {
+func domainToProtoHouse(h *domain.House) *profilepb.House {
 	return &profilepb.House{
 		Id:      h.ID,
 		Name:    h.Name,

@@ -1,14 +1,20 @@
+# Build context: project root  (docker-compose: context: .)
 FROM golang:1.25-alpine AS build
 
-WORKDIR /src
+WORKDIR /workspace
 
-COPY go.mod go.sum ./
+COPY contracts/go.mod contracts/go.sum ./contracts/
+
+COPY api-gateway/go.mod api-gateway/go.sum ./api-gateway/
+WORKDIR /workspace/api-gateway
 RUN go mod download
 
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/srv ./cmd/api
+WORKDIR /workspace
+COPY contracts/ ./contracts/
+COPY api-gateway/ ./api-gateway/
 
-# ---
+WORKDIR /workspace/api-gateway
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/srv ./cmd/api
 
 FROM alpine:3.21 AS production
 

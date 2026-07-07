@@ -1,4 +1,4 @@
-.PHONY: build run tidy lint
+.PHONY: build run tidy fmt lint test
 
 build:
 	go build -o bin/auth-service ./cmd
@@ -9,5 +9,11 @@ run:
 tidy:
 	GONOSUMDB="github.com/zimnyles/*" go mod tidy
 
+fmt:
+	gofmt -w .
+
 lint:
 	golangci-lint run ./...
+
+test:
+	go test ./...

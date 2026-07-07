@@ -1,7 +1,5 @@
 services:
 
-  # ─── Infrastructure ──────────────────────────────────────────────────────────
-
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -11,7 +9,6 @@ services:
       POSTGRES_DB: postgres
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./docker/postgres/init-dbs.sh:/docker-entrypoint-initdb.d/init-dbs.sh:ro
     ports:
       - "5432:5432"
     healthcheck:
@@ -19,6 +16,26 @@ services:
       interval: 5s
       timeout: 5s
       retries: 10
+    networks:
+      - hms-net
+
+  postgres-init:
+    image: postgres:16-alpine
+    restart: "no"
+    environment:
+      PGPASSWORD: postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command:
+      - sh
+      - -ec
+      - |
+        for db in auth profile requests notifications news; do
+          if [ "$$(psql -h postgres -U postgres -d postgres -tAc "SELECT 1 FROM pg_database WHERE datname = '$$db'")" != "1" ]; then
+            createdb -h postgres -U postgres "$$db"
+          fi
+        done
     networks:
       - hms-net
 
@@ -53,8 +70,6 @@ services:
     networks:
       - hms-net
 
-  # ─── Microservices ───────────────────────────────────────────────────────────
-
   auth-service:
     build:
       context: .
@@ -79,8 +94,8 @@ services:
       POSTGRES_DB: auth
       POSTGRES_SSLMODE: disable
     depends_on:
-      postgres:
-        condition: service_healthy
+      postgres-init:
+        condition: service_completed_successfully
     networks:
       - hms-net
 
@@ -104,7 +119,39 @@ services:
       POSTGRES_DB: profile
       POSTGRES_SSLMODE: disable
     depends_on:
-      postgres:
+      postgres-init:
+        condition: service_completed_successfully
+    networks:
+      - hms-net
+
+  news-service:
+    build:
+      context: .
+      dockerfile: news-microservice/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_NAME: news-service
+      APP_HOST: 0.0.0.0
+      APP_PORT: 50053
+      LOG_LEVEL: info
+
+      REQUEST_TIMEOUT: 5s
+
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: news
+      POSTGRES_SSLMODE: disable
+
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_USER: guest
+      RABBIT_PASSWORD: guest
+    depends_on:
+      postgres-init:
+        condition: service_completed_successfully
+      rabbitmq:
         condition: service_healthy
     networks:
       - hms-net
@@ -134,8 +181,37 @@ services:
       RABBIT_USER: guest
       RABBIT_PASSWORD: guest
     depends_on:
-      postgres:
+      postgres-init:
+        condition: service_completed_successfully
+      rabbitmq:
         condition: service_healthy
+    networks:
+      - hms-net
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: notification-microservice/Dockerfile
+    restart: unless-stopped
+    environment:
+      APP_NAME: notification-service
+      APP_HOST: 0.0.0.0
+      APP_PORT: 50055
+      LOG_LEVEL: info
+      REQUEST_TIMEOUT: 5s
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: notifications
+      POSTGRES_SSLMODE: disable
+      RABBIT_HOST: rabbitmq
+      RABBIT_PORT: 5672
+      RABBIT_USER: guest
+      RABBIT_PASSWORD: guest
+    depends_on:
+      postgres-init:
+        condition: service_completed_successfully
       rabbitmq:
         condition: service_healthy
     networks:
@@ -143,7 +219,7 @@ services:
 
   api-gateway:
     build:
-      context: .                            # корень нужен из-за replace ../contracts
+      context: .
       dockerfile: api-gateway/Dockerfile
     restart: unless-stopped
     ports:
@@ -165,6 +241,8 @@ services:
       AUTH_ADDR: auth-service:50051
       PROFILE_ADDR: profile-service:50052
       REQUESTS_ADDR: requests-service:50054
+      NEWS_ADDR: news-service:50053
+      NOTIFICATIONS_ADDR: notification-service:50055
 
       REDIS_HOST: redis
       REDIS_PORT: 6379
@@ -175,36 +253,29 @@ services:
         condition: service_started
       profile-service:
         condition: service_started
+      news-service:
+        condition: service_started
       requests-service:
+        condition: service_started
+      notification-service:
         condition: service_started
       redis:
         condition: service_healthy
     networks:
       - hms-net
 
-  # ─── Будущие микросервисы ─────────────────────────────────────────────────────
-
-  # notification-service:
-  #   build:
-  #     context: .
-  #     dockerfile: notification-microservice/Dockerfile
-  #   restart: unless-stopped
-  #   environment:
-  #     APP_NAME: notification-service
-  #     APP_HOST: 0.0.0.0
-  #     APP_PORT: 50054
-  #     POSTGRES_HOST: postgres
-  #     POSTGRES_DB: notifications
-  #     POSTGRES_USER: postgres
-  #     POSTGRES_PASSWORD: postgres
-  #     POSTGRES_SSLMODE: disable
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
-  #   networks:
-  #     - hms-net
-
-# ─── Volumes & Networks ──────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "${FRONTEND_PORT:-3000}:80"
+    depends_on:
+      api-gateway:
+        condition: service_started
+    networks:
+      - hms-net
 
 volumes:
   postgres_data:

@@ -10,9 +10,8 @@ service NotificationService {
   rpc RegisterDevice(RegisterDeviceRequest)       returns (google.protobuf.Empty);
   rpc UnregisterDevice(UnregisterDeviceRequest)   returns (google.protobuf.Empty);
   rpc GetUserNotifications(GetUserNotificationsRequest) returns (GetUserNotificationsResponse);
+  rpc Subscribe(SubscribeRequest) returns (stream Notification);
 }
-
-// ─── device ───────────────────────────────────────────────────────────────────
 
 message Device {
   string device_token = 1;
@@ -31,8 +30,6 @@ message UnregisterDeviceRequest {
   string user_id      = 2;
 }
 
-// ─── notification ─────────────────────────────────────────────────────────────
-
 message Notification {
   string id         = 1;
   string user_id    = 2; // адресат-житель; пусто = широковещательное
@@ -48,9 +45,15 @@ message GetUserNotificationsRequest {
   string user_id = 1;
   int32  limit   = 2; // default 20
   int32  offset  = 3; // default 0
+  string house_id = 4;
 }
 
 message GetUserNotificationsResponse {
   repeated Notification notifications = 1;
   int32                 total         = 2;
+}
+
+message SubscribeRequest {
+  string user_id  = 1;
+  string house_id = 2;
 }

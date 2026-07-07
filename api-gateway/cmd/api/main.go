@@ -4,10 +4,11 @@ import (
 	"context"
 	"errors"
 
+	"github.com/rs/zerolog/log"
+
 	"api-gateway/internal/api"
 	"api-gateway/pkg/context_os"
 	"api-gateway/resources"
-	"github.com/rs/zerolog/log"
 )
 
 func main() {

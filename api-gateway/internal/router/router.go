@@ -1,9 +1,10 @@
 package router
 
 import (
+	"github.com/gofiber/fiber/v2"
+
 	"api-gateway/internal/middlewares"
 	"api-gateway/internal/models/constants"
-	"github.com/gofiber/fiber/v2"
 )
 
 type Handlers struct {
@@ -59,6 +60,7 @@ func (r *Router) notifications() {
 	g.Use(r.mw.JWTAuth())
 	g.Post("/register", r.h.Notifications.Register)
 	g.Delete("/unregister", r.h.Notifications.Unregister)
+	g.Get("/stream", r.h.Notifications.Stream)
 }
 
 func (r *Router) profile() {

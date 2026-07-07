@@ -1,9 +1,9 @@
 package server
 
 import (
-	"profile-service/infra/models/domain"
-
 	profilepb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/profile/langs/go"
+
+	"profile-service/infra/models/domain"
 )
 
 func protoToUpsertProfile(req *profilepb.UpsertProfileRequest) *domain.UpsertProfileRequest {

@@ -14,6 +14,18 @@ func toDomainCreateRequest(userID string, req dto.CreateMaintenanceRequest) *dom
 	}
 }
 
+func toDomainListRequest(userID, status, requestType string, limit, offset int) *domain.ListMaintenanceRequests {
+	return &domain.ListMaintenanceRequests{UserID: userID, Status: status, Type: requestType, Limit: limit, Offset: offset}
+}
+
+func toDomainUpdateStatus(id, userID string, req dto.UpdateMaintenanceRequestStatus) *domain.UpdateMaintenanceRequestStatus {
+	return &domain.UpdateMaintenanceRequestStatus{ID: id, Status: req.Status, UserID: userID}
+}
+
+func toDomainAddComment(requestID, userID string, req dto.AddMaintenanceRequestComment) *domain.AddMaintenanceRequestComment {
+	return &domain.AddMaintenanceRequestComment{RequestID: requestID, UserID: userID, Content: req.Content}
+}
+
 func toDTORequest(r *domain.MaintenanceRequest) dto.MaintenanceRequestResponse {
 	return dto.MaintenanceRequestResponse{
 		ID:          r.ID,

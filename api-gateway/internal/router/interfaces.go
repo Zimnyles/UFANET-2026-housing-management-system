@@ -21,6 +21,7 @@ type NewsHandler interface {
 type NotificationsHandler interface {
 	Register(c *fiber.Ctx) error
 	Unregister(c *fiber.Ctx) error
+	Stream(c *fiber.Ctx) error
 }
 
 type ProfileHandler interface {

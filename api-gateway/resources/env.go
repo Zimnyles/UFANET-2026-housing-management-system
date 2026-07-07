@@ -24,9 +24,11 @@ type Env struct {
 
 	RequestTimeout time.Duration `envconfig:"REQUEST_TIMEOUT" default:"200ms"`
 
-	AuthAddr     string `envconfig:"AUTH_ADDR"    default:"localhost:50051"`
-	ProfileAddr  string `envconfig:"PROFILE_ADDR" default:"localhost:50052"`
-	RequestsAddr string `envconfig:"REQUESTS_ADDR" default:"localhost:50054"`
+	AuthAddr          string `envconfig:"AUTH_ADDR"    default:"localhost:50051"`
+	ProfileAddr       string `envconfig:"PROFILE_ADDR" default:"localhost:50052"`
+	RequestsAddr      string `envconfig:"REQUESTS_ADDR" default:"localhost:50054"`
+	NewsAddr          string `envconfig:"NEWS_ADDR"     default:"localhost:50053"`
+	NotificationsAddr string `envconfig:"NOTIFICATIONS_ADDR" default:"localhost:50055"`
 
 	RedisHost     string `envconfig:"REDIS_HOST"     default:"localhost"`
 	RedisPort     int    `envconfig:"REDIS_PORT"     default:"6379"`

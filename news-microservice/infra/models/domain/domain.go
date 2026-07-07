@@ -8,12 +8,14 @@ type News struct {
 	Content   string
 	HouseID   string
 	CreatedAt time.Time
+	CreatedBy string
 }
 
 type CreateNewsRequest struct {
-	Title   string
-	Content string
-	HouseID string
+	Title     string
+	Content   string
+	HouseID   string
+	CreatedBy string
 }
 
 type GetNewsRequest struct {

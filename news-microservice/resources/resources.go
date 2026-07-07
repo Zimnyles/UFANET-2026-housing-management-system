@@ -3,13 +3,14 @@ package resources
 import (
 	"context"
 	"fmt"
-	"news-service/infra/mq"
-	repo "news-service/infra/repository"
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"news-service/infra/mq"
+	repo "news-service/infra/repository"
 )
 
 type Resources struct {
@@ -32,19 +33,23 @@ func InitResources(ctx context.Context) (*Resources, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connect postgres: %w", err)
 	}
+
 	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, fmt.Errorf("postgres handle: %w", err)
 	}
+
 	if err := sqlDB.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
+
 	logger.Info().Str("host", env.PostgresHost).Int("port", env.PostgresPort).Msg("postgres connected")
 
 	repository := repo.New(db)
 	if err := repository.Migrate(ctx); err != nil {
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
+
 	logger.Info().Msg("migrations applied")
 
 	publisher, err := mq.New(env.RabbitDSN(), logger)
@@ -73,6 +78,8 @@ func initLogger(serviceName, level string) *zerolog.Logger {
 	if err != nil {
 		lvl = zerolog.InfoLevel
 	}
+
 	logger := log.Level(lvl).With().Str("service", serviceName).Logger()
+
 	return &logger
 }

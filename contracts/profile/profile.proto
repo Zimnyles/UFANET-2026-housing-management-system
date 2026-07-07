@@ -16,8 +16,6 @@ service ProfileService {
   rpc ListHouses(ListHousesRequest)     returns (ListHousesResponse);
 }
 
-// ─── profile ──────────────────────────────────────────────────────────────────
-
 message Profile {
   string user_id   = 1;
   string full_name = 2;

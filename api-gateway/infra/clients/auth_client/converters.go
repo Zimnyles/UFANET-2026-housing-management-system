@@ -1,9 +1,9 @@
 package auth_client
 
 import (
-	"api-gateway/internal/models/domain"
-
 	authpb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/auth/langs/go"
+
+	"api-gateway/internal/models/domain"
 )
 
 func toProtoRegisterRequest(req *domain.RegisterRequest) *authpb.RegisterRequest {

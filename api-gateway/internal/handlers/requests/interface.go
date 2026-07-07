@@ -14,3 +14,7 @@ type RequestsService interface {
 	AddComment(ctx context.Context, req *domain.AddMaintenanceRequestComment) (*domain.RequestComment, error)
 	GetComments(ctx context.Context, requestID string) ([]*domain.RequestComment, error)
 }
+
+type ProfileService interface {
+	GetProfile(context.Context, string) (*domain.Profile, error)
+}

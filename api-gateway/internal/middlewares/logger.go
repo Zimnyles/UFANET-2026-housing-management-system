@@ -3,10 +3,11 @@ package middlewares
 import (
 	"time"
 
-	"api-gateway/internal/models/constants"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog"
+
+	"api-gateway/internal/models/constants"
 )
 
 func (mw *Middlewares) requestLogger(logger *zerolog.Logger) fiber.Handler {

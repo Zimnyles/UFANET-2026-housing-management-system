@@ -3,10 +3,10 @@ package grpcerrors
 import (
 	"errors"
 
-	infra_errors "news-service/infra/errors"
-
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+
+	infra_errors "news-service/infra/errors"
 )
 
 var errCodeMap = map[error]codes.Code{
@@ -27,5 +27,6 @@ func ToGrpcError(err error) error {
 			return status.Error(code, err.Error())
 		}
 	}
+
 	return status.Error(codes.Internal, infra_errors.ErrInternal.Error())
 }

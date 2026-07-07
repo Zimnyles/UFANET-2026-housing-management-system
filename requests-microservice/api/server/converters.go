@@ -3,9 +3,9 @@ package server
 import (
 	"time"
 
-	"requests-service/infra/models/domain"
-
 	requestspb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/requests/langs/go"
+
+	"requests-service/infra/models/domain"
 )
 
 func protoToCreateRequest(req *requestspb.CreateRequestRequest) *domain.CreateRequestRequest {

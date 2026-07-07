@@ -1,12 +1,12 @@
 package profile_handler
 
 import (
+	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog"
+
 	app_errors "api-gateway/internal/errors"
 	"api-gateway/internal/models/constants"
 	"api-gateway/internal/models/dto"
-
-	"github.com/gofiber/fiber/v2"
-	"github.com/rs/zerolog"
 )
 
 type ProfileHandler struct {
@@ -69,8 +69,6 @@ func (h *ProfileHandler) ListManagementCompanies(c *fiber.Ctx) error {
 	return c.JSON(dto.ListManagementCompaniesResponse{Companies: items})
 }
 
-// ─── POST /management-companies (admin) ───────────────────────────────────────
-
 func (h *ProfileHandler) CreateManagementCompany(c *fiber.Ctx) error {
 	var req dto.CreateManagementCompanyRequest
 	if err := c.BodyParser(&req); err != nil {
@@ -89,8 +87,6 @@ func (h *ProfileHandler) CreateManagementCompany(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusCreated).JSON(toDTOCompanyResponse(mc))
 }
 
-// ─── GET /houses ──────────────────────────────────────────────────────────────
-
 func (h *ProfileHandler) ListHouses(c *fiber.Ctx) error {
 	ukID := c.Query("uk_id")
 
@@ -106,8 +102,6 @@ func (h *ProfileHandler) ListHouses(c *fiber.Ctx) error {
 
 	return c.JSON(dto.ListHousesResponse{Houses: items})
 }
-
-// ─── POST /houses (admin) ─────────────────────────────────────────────────────
 
 func (h *ProfileHandler) CreateHouse(c *fiber.Ctx) error {
 	var req dto.CreateHouseRequest

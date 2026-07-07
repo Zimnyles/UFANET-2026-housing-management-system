@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"errors"
+
+	"github.com/rs/zerolog/log"
+
 	"news-service/api"
 	"news-service/pkg/context_os"
 	"news-service/resources"
-
-	"github.com/rs/zerolog/log"
 )
 
 func main() {

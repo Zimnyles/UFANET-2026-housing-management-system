@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"time"
 
-	infra_errors "profile-service/infra/errors"
-	"profile-service/infra/models/domain"
-
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	infra_errors "profile-service/infra/errors"
+	"profile-service/infra/models/domain"
 )
 
 type Repository struct {
@@ -62,6 +62,7 @@ func (r *Repository) Migrate(ctx context.Context) error {
 	if err := r.db.WithContext(ctx).AutoMigrate(&dbManagementCompany{}, &dbHouse{}, &dbProfile{}); err != nil {
 		return fmt.Errorf("auto migrate: %w", err)
 	}
+
 	return nil
 }
 
@@ -71,18 +72,22 @@ func (r *Repository) GetProfile(ctx context.Context, userID string) (*domain.Pro
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, infra_errors.ErrProfileNotFound
 		}
+
 		return nil, fmt.Errorf("get profile: %w", err)
 	}
+
 	return profileToDomain(&p), nil
 }
 
 func (r *Repository) UpsertProfile(ctx context.Context, profile *domain.Profile) (*domain.Profile, error) {
 	db := r.db.WithContext(ctx)
+
 	var house dbHouse
 	if err := db.Where("id = ?", profile.HouseID).First(&house).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, infra_errors.ErrHouseIDInvalid
 		}
+
 		return nil, fmt.Errorf("get house: %w", err)
 	}
 
@@ -120,6 +125,7 @@ func (r *Repository) IsProfileComplete(ctx context.Context, userID string) (bool
 		Count(&count).Error; err != nil {
 		return false, fmt.Errorf("is profile complete: %w", err)
 	}
+
 	return count > 0, nil
 }
 
@@ -128,6 +134,7 @@ func (r *Repository) CreateManagementCompany(ctx context.Context, company *domai
 	if err := r.db.WithContext(ctx).Create(&c).Error; err != nil {
 		return nil, fmt.Errorf("create management company: %w", err)
 	}
+
 	return companyToDomain(&c), nil
 }
 
@@ -136,10 +143,12 @@ func (r *Repository) ListManagementCompanies(ctx context.Context) ([]*domain.Man
 	if err := r.db.WithContext(ctx).Order("name").Find(&companies).Error; err != nil {
 		return nil, fmt.Errorf("list management companies: %w", err)
 	}
+
 	result := make([]*domain.ManagementCompany, 0, len(companies))
 	for i := range companies {
 		result = append(result, companyToDomain(&companies[i]))
 	}
+
 	return result, nil
 }
 
@@ -148,22 +157,27 @@ func (r *Repository) CreateHouse(ctx context.Context, house *domain.House) (*dom
 	if err := r.db.WithContext(ctx).Create(&h).Error; err != nil {
 		return nil, fmt.Errorf("create house: %w", err)
 	}
+
 	return houseToDomain(&h), nil
 }
 
 func (r *Repository) ListHouses(ctx context.Context, ukID string) ([]*domain.House, error) {
 	var houses []dbHouse
+
 	query := r.db.WithContext(ctx)
 	if ukID != "" {
 		query = query.Where("uk_id = ?", ukID)
 	}
+
 	if err := query.Order("name").Find(&houses).Error; err != nil {
 		return nil, fmt.Errorf("list houses: %w", err)
 	}
+
 	result := make([]*domain.House, 0, len(houses))
 	for i := range houses {
 		result = append(result, houseToDomain(&houses[i]))
 	}
+
 	return result, nil
 }
 

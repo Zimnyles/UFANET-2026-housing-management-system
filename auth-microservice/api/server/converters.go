@@ -1,9 +1,9 @@
 package server
 
 import (
-	"auth-service/infra/models/domain"
-
 	authpb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/auth/langs/go"
+
+	"auth-service/infra/models/domain"
 )
 
 func ConvertFromProtoToRegisterRequest(req *authpb.RegisterRequest) *domain.RegisterRequest {

@@ -3,12 +3,12 @@ package requests_client
 import (
 	"fmt"
 
-	app_errors "api-gateway/internal/errors"
-
 	"github.com/rs/zerolog"
 	requestspb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/requests/langs/go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+
+	app_errors "api-gateway/internal/errors"
 )
 
 type RequestsClient struct {

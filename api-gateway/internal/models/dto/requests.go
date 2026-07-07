@@ -9,14 +9,16 @@ type MaintenanceRequestResponse struct {
 	UserID      string `json:"user_id"`
 	CreatedAt   string `json:"created_at"`
 	UpdatedAt   string `json:"updated_at"`
+	AuthorName  string `json:"author_name"`
 }
 
 type RequestCommentResponse struct {
-	ID        string `json:"id"`
-	RequestID string `json:"request_id"`
-	UserID    string `json:"user_id"`
-	Content   string `json:"content"`
-	CreatedAt string `json:"created_at"`
+	ID         string `json:"id"`
+	RequestID  string `json:"request_id"`
+	UserID     string `json:"user_id"`
+	Content    string `json:"content"`
+	CreatedAt  string `json:"created_at"`
+	AuthorName string `json:"author_name"`
 }
 
 type CreateMaintenanceRequest struct {

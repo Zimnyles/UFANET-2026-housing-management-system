@@ -24,6 +24,7 @@ func getContext(ctx context.Context, timeout time.Duration, logger *zerolog.Logg
 
 	go func() {
 		defer signal.Stop(sigs)
+
 		select {
 		case <-ctx.Done():
 		case sig := <-sigs:

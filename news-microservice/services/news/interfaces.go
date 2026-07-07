@@ -2,6 +2,7 @@ package news_service
 
 import (
 	"context"
+
 	"news-service/infra/models/domain"
 )
 

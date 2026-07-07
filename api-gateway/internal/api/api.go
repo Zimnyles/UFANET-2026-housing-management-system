@@ -3,6 +3,8 @@ package api
 import (
 	"context"
 
+	"github.com/gofiber/fiber/v2"
+
 	auth_handler "api-gateway/internal/handlers/auth"
 	health_handler "api-gateway/internal/handlers/health"
 	news_handler "api-gateway/internal/handlers/news"
@@ -13,9 +15,10 @@ import (
 	"api-gateway/internal/router"
 	"api-gateway/resources"
 	auth_service "api-gateway/services/auth"
+	news_service "api-gateway/services/news"
+	notifications_service "api-gateway/services/notifications"
 	profile_service "api-gateway/services/profile"
 	requests_service "api-gateway/services/requests"
-	"github.com/gofiber/fiber/v2"
 )
 
 type API struct {
@@ -33,20 +36,22 @@ func (a *API) Start(ctx context.Context) error {
 		CaseSensitive: true,
 	})
 
-	mw := middlewares.New(ctx, a.res, app)
-	mw.SetGlobalMiddlewares()
+	mw := middlewares.New(a.res, app)
+	mw.SetGlobalMiddlewares(ctx)
 
 	authService := auth_service.New(a.res.AuthClient, a.res.Logger)
 	profileService := profile_service.New(a.res.ProfileClient, a.res.Logger)
 	requestsService := requests_service.New(a.res.RequestsClient, a.res.Logger)
+	newsService := news_service.New(a.res.NewsClient, a.res.Logger)
+	notificationsService := notifications_service.New(a.res.NotificationsClient, a.res.Logger)
 
 	handlers := router.Handlers{
 		Health:        health_handler.NewHandler(a.res.Env.ServiceName),
 		Auth:          auth_handler.NewHandler(authService, mw, a.res.Logger),
-		News:          news_handler.NewHandler(a.res.Logger),
-		Notifications: notifications_handler.NewHandler(a.res.Logger),
+		News:          news_handler.NewHandler(newsService, profileService, a.res.Logger),
+		Notifications: notifications_handler.NewHandler(notificationsService, profileService, a.res.Logger),
 		Profile:       profile_handler.NewHandler(profileService, a.res.Logger),
-		Requests:      requests_handler.NewHandler(requestsService, a.res.Logger),
+		Requests:      requests_handler.NewHandler(requestsService, profileService, a.res.Logger),
 	}
 
 	router.New(app, mw, handlers).Register()
@@ -55,6 +60,7 @@ func (a *API) Start(ctx context.Context) error {
 
 	go func() {
 		a.res.Logger.Info().Str("addr", a.res.Env.Addr()).Msg("starting server")
+
 		errCh <- app.Listen(a.res.Env.Addr())
 	}()
 

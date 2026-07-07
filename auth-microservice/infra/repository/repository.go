@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"gorm.io/gorm"
+
 	infra_errors "auth-service/infra/errors"
 	"auth-service/infra/models/domain"
-
-	"gorm.io/gorm"
 )
 
 type Repository struct {
@@ -36,12 +36,14 @@ func (r *Repository) Migrate(ctx context.Context) error {
 	if err := db.AutoMigrate(&domain.User{}, &AdminCode{}); err != nil {
 		return fmt.Errorf("auto migrate: %w", err)
 	}
+
 	if err := db.Where(AdminCode{Code: "123123123"}).FirstOrCreate(&AdminCode{
 		Code:   "123123123",
 		Status: "active",
 	}).Error; err != nil {
 		return fmt.Errorf("seed admin code: %w", err)
 	}
+
 	return nil
 }
 
@@ -53,6 +55,7 @@ func (r *Repository) IsActiveAdminCode(ctx context.Context, code string) (bool, 
 		Count(&count).Error; err != nil {
 		return false, fmt.Errorf("check admin code: %w", err)
 	}
+
 	return count > 0, nil
 }
 
@@ -61,8 +64,10 @@ func (r *Repository) CreateUser(ctx context.Context, user *domain.User) (*domain
 		if errors.Is(err, gorm.ErrDuplicatedKey) || containsCode(err, "23505") {
 			return nil, infra_errors.ErrEmailAlreadyExists
 		}
+
 		return nil, fmt.Errorf("create user: %w", err)
 	}
+
 	return user, nil
 }
 
@@ -72,8 +77,10 @@ func (r *Repository) GetUserByEmail(ctx context.Context, email string) (*domain.
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, infra_errors.ErrUserNotFound
 		}
+
 		return nil, fmt.Errorf("get user by email: %w", err)
 	}
+
 	return &u, nil
 }
 
@@ -84,5 +91,6 @@ func containsCode(err error, code string) bool {
 	if e, ok := err.(pgErr); ok {
 		return e.SQLState() == code
 	}
+
 	return false
 }

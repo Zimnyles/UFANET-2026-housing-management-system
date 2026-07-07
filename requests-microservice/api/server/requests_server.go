@@ -2,6 +2,7 @@ package server
 
 import (
 	"context"
+	"math"
 
 	"github.com/rs/zerolog"
 	requestspb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/requests/langs/go"
@@ -22,6 +23,7 @@ func (s *RequestsServer) CreateRequest(ctx context.Context, req *requestspb.Crea
 	if err != nil {
 		return nil, err
 	}
+
 	return &requestspb.RequestResponse{Request: domainToProtoRequest(r)}, nil
 }
 
@@ -30,11 +32,25 @@ func (s *RequestsServer) GetRequests(ctx context.Context, req *requestspb.GetReq
 	if err != nil {
 		return nil, err
 	}
+
 	pb := make([]*requestspb.MaintenanceRequest, 0, len(items))
 	for _, item := range items {
 		pb = append(pb, domainToProtoRequest(item))
 	}
-	return &requestspb.GetRequestsResponse{Requests: pb, Total: int32(total)}, nil
+
+	return &requestspb.GetRequestsResponse{Requests: pb, Total: totalToInt32(total)}, nil
+}
+
+func totalToInt32(total int64) int32 {
+	if total <= 0 {
+		return 0
+	}
+
+	if total > math.MaxInt32 {
+		return math.MaxInt32
+	}
+
+	return int32(total)
 }
 
 func (s *RequestsServer) GetRequest(ctx context.Context, req *requestspb.GetRequestRequest) (*requestspb.RequestResponse, error) {
@@ -42,6 +58,7 @@ func (s *RequestsServer) GetRequest(ctx context.Context, req *requestspb.GetRequ
 	if err != nil {
 		return nil, err
 	}
+
 	return &requestspb.RequestResponse{Request: domainToProtoRequest(r)}, nil
 }
 
@@ -50,6 +67,7 @@ func (s *RequestsServer) UpdateRequestStatus(ctx context.Context, req *requestsp
 	if err != nil {
 		return nil, err
 	}
+
 	return &requestspb.RequestResponse{Request: domainToProtoRequest(r)}, nil
 }
 
@@ -58,6 +76,7 @@ func (s *RequestsServer) AddComment(ctx context.Context, req *requestspb.AddComm
 	if err != nil {
 		return nil, err
 	}
+
 	return &requestspb.CommentResponse{Comment: domainToProtoComment(c)}, nil
 }
 
@@ -66,9 +85,11 @@ func (s *RequestsServer) GetComments(ctx context.Context, req *requestspb.GetCom
 	if err != nil {
 		return nil, err
 	}
+
 	pb := make([]*requestspb.Comment, 0, len(items))
 	for _, item := range items {
 		pb = append(pb, domainToProtoComment(item))
 	}
+
 	return &requestspb.GetCommentsResponse{Comments: pb}, nil
 }

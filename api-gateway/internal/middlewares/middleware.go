@@ -4,15 +4,15 @@ import (
 	"context"
 	"time"
 
-	"api-gateway/resources"
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
 	"github.com/rs/zerolog"
+
+	"api-gateway/resources"
 )
 
 type Middlewares struct {
-	ctx                 context.Context
 	jwtSecret           string
 	rateLimitMax        int
 	rateLimitExpiration time.Duration
@@ -22,9 +22,8 @@ type Middlewares struct {
 	app                 *fiber.App
 }
 
-func New(ctx context.Context, res *resources.Resources, app *fiber.App) *Middlewares {
+func New(res *resources.Resources, app *fiber.App) *Middlewares {
 	return &Middlewares{
-		ctx:                 ctx,
 		jwtSecret:           res.Env.JWTSecret,
 		rateLimitMax:        res.Env.RateLimitMax,
 		rateLimitExpiration: res.Env.RateLimitExpiration,
@@ -35,15 +34,16 @@ func New(ctx context.Context, res *resources.Resources, app *fiber.App) *Middlew
 	}
 }
 
-func (mw *Middlewares) SetGlobalMiddlewares() {
+func (mw *Middlewares) SetGlobalMiddlewares(ctx context.Context) {
 	mw.app.Use(cors.New(cors.Config{
 		AllowOrigins: "*",
 		AllowMethods: "GET,POST,PUT,PATCH,DELETE,OPTIONS",
 		AllowHeaders: "Origin,Content-Type,Accept,Authorization",
 	}))
 	mw.app.Use(func(c *fiber.Ctx) error {
-		reqCtx, cancel := context.WithCancel(mw.ctx)
+		reqCtx, cancel := context.WithCancel(ctx)
 		defer cancel()
+
 		c.SetUserContext(reqCtx)
 
 		return c.Next()

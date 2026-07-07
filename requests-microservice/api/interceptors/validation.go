@@ -2,10 +2,11 @@ package interceptors
 
 import (
 	"context"
-	"requests-service/api/server"
 
 	requestspb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/requests/langs/go"
 	"google.golang.org/grpc"
+
+	"requests-service/api/server"
 )
 
 func Validation() grpc.UnaryServerInterceptor {
@@ -13,6 +14,7 @@ func Validation() grpc.UnaryServerInterceptor {
 		if err := validate(req); err != nil {
 			return nil, err
 		}
+
 		return handler(ctx, req)
 	}
 }
@@ -30,5 +32,6 @@ func validate(req interface{}) error {
 	case *requestspb.GetCommentsRequest:
 		return server.ValidateGetComments(r)
 	}
+
 	return nil
 }

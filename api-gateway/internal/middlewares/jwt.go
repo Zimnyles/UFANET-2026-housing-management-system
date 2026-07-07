@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	app_errors "api-gateway/internal/errors"
-	"api-gateway/internal/models/constants"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v4"
+
+	app_errors "api-gateway/internal/errors"
+	"api-gateway/internal/models/constants"
 )
 
 type Claims struct {
@@ -36,7 +37,7 @@ func (mw *Middlewares) JWTAuth() fiber.Handler {
 
 		token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 			if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-				return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+				return nil, fmt.Errorf("%w: %v", app_errors.ErrUnexpectedSigningMethod, t.Header["alg"])
 			}
 
 			return []byte(mw.jwtSecret), nil

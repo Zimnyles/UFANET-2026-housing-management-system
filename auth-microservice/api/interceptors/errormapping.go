@@ -1,10 +1,11 @@
 package interceptors
 
 import (
-	"auth-service/infra/grpcerrors"
 	"context"
 
 	"google.golang.org/grpc"
+
+	"auth-service/infra/grpcerrors"
 )
 
 func ErrorMapping() grpc.UnaryServerInterceptor {
@@ -13,6 +14,7 @@ func ErrorMapping() grpc.UnaryServerInterceptor {
 		if err != nil {
 			return nil, grpcerrors.ToGrpcError(err)
 		}
+
 		return resp, nil
 	}
 }

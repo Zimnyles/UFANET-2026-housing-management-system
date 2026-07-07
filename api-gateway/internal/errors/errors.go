@@ -6,10 +6,11 @@ import (
 )
 
 var (
-	ErrMissingAuthHeader = errors.New("missing authorization header")
-	ErrInvalidAuthFormat = errors.New("invalid authorization format")
-	ErrInvalidToken      = errors.New("invalid or expired token")
-	ErrInvalidClaims     = errors.New("invalid token claims")
+	ErrMissingAuthHeader       = errors.New("missing authorization header")
+	ErrInvalidAuthFormat       = errors.New("invalid authorization format")
+	ErrInvalidToken            = errors.New("invalid or expired token")
+	ErrInvalidClaims           = errors.New("invalid token claims")
+	ErrUnexpectedSigningMethod = errors.New("unexpected JWT signing method")
 
 	ErrUnauthorized = errors.New("unauthorized")
 	ErrForbidden    = errors.New("forbidden")

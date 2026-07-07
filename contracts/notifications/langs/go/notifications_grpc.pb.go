@@ -26,6 +26,7 @@ type NotificationServiceClient interface {
 	RegisterDevice(ctx context.Context, in *RegisterDeviceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	UnregisterDevice(ctx context.Context, in *UnregisterDeviceRequest, opts ...grpc.CallOption) (*emptypb.Empty, error)
 	GetUserNotifications(ctx context.Context, in *GetUserNotificationsRequest, opts ...grpc.CallOption) (*GetUserNotificationsResponse, error)
+	Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (NotificationService_SubscribeClient, error)
 }
 
 type notificationServiceClient struct {
@@ -63,6 +64,38 @@ func (c *notificationServiceClient) GetUserNotifications(ctx context.Context, in
 	return out, nil
 }
 
+func (c *notificationServiceClient) Subscribe(ctx context.Context, in *SubscribeRequest, opts ...grpc.CallOption) (NotificationService_SubscribeClient, error) {
+	stream, err := c.cc.NewStream(ctx, &NotificationService_ServiceDesc.Streams[0], "/notifications.NotificationService/Subscribe", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &notificationServiceSubscribeClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type NotificationService_SubscribeClient interface {
+	Recv() (*Notification, error)
+	grpc.ClientStream
+}
+
+type notificationServiceSubscribeClient struct {
+	grpc.ClientStream
+}
+
+func (x *notificationServiceSubscribeClient) Recv() (*Notification, error) {
+	m := new(Notification)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // NotificationServiceServer is the server API for NotificationService service.
 // All implementations should embed UnimplementedNotificationServiceServer
 // for forward compatibility
@@ -70,6 +103,7 @@ type NotificationServiceServer interface {
 	RegisterDevice(context.Context, *RegisterDeviceRequest) (*emptypb.Empty, error)
 	UnregisterDevice(context.Context, *UnregisterDeviceRequest) (*emptypb.Empty, error)
 	GetUserNotifications(context.Context, *GetUserNotificationsRequest) (*GetUserNotificationsResponse, error)
+	Subscribe(*SubscribeRequest, NotificationService_SubscribeServer) error
 }
 
 // UnimplementedNotificationServiceServer should be embedded to have forward compatible implementations.
@@ -84,6 +118,9 @@ func (UnimplementedNotificationServiceServer) UnregisterDevice(context.Context, 
 }
 func (UnimplementedNotificationServiceServer) GetUserNotifications(context.Context, *GetUserNotificationsRequest) (*GetUserNotificationsResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserNotifications not implemented")
+}
+func (UnimplementedNotificationServiceServer) Subscribe(*SubscribeRequest, NotificationService_SubscribeServer) error {
+	return status.Errorf(codes.Unimplemented, "method Subscribe not implemented")
 }
 
 // UnsafeNotificationServiceServer may be embedded to opt out of forward compatibility for this service.
@@ -151,6 +188,27 @@ func _NotificationService_GetUserNotifications_Handler(srv interface{}, ctx cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _NotificationService_Subscribe_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(SubscribeRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(NotificationServiceServer).Subscribe(m, &notificationServiceSubscribeServer{stream})
+}
+
+type NotificationService_SubscribeServer interface {
+	Send(*Notification) error
+	grpc.ServerStream
+}
+
+type notificationServiceSubscribeServer struct {
+	grpc.ServerStream
+}
+
+func (x *notificationServiceSubscribeServer) Send(m *Notification) error {
+	return x.ServerStream.SendMsg(m)
+}
+
 // NotificationService_ServiceDesc is the grpc.ServiceDesc for NotificationService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -171,6 +229,12 @@ var NotificationService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _NotificationService_GetUserNotifications_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "Subscribe",
+			Handler:       _NotificationService_Subscribe_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "notifications.proto",
 }

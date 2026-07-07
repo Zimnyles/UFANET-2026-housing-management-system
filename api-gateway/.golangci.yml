@@ -19,7 +19,6 @@ linters:
     - errorlint
     - forbidigo
     - forcetypeassert
-    - gochecknoglobals
     - gochecknoinits
     - goconst
     - gocritic
@@ -27,11 +26,8 @@ linters:
     - gosec
     - govet
     - ineffassign
-    - lll
     - makezero
     - misspell
-    - mnd
-    - nestif
     - nilerr
     - nlreturn
     - noctx
@@ -49,7 +45,7 @@ linters:
     - unused
     - usestdlibvars
     - whitespace
-    - wsl
+    - wsl_v5
     - zerologlint
   settings:
     cyclop:
@@ -64,6 +60,10 @@ linters:
       line-length: 150
   exclusions:
     generated: lax
+    rules:
+      - linters:
+          - gosec
+        text: "G101|G117"
     presets:
       - comments
       - common-false-positives
@@ -79,6 +79,18 @@ formatters:
     - gofmt
     - gofumpt
     - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(api-gateway)
+      custom-order: true
+    gofumpt:
+      module-path: api-gateway
+    goimports:
+      local-prefixes:
+        - api-gateway
   exclusions:
     generated: lax
     paths:

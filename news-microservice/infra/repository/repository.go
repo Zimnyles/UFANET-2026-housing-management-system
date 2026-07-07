@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"gorm.io/gorm"
+
 	infra_errors "news-service/infra/errors"
 	"news-service/infra/models/domain"
-
-	"gorm.io/gorm"
 )
 
 type Repository struct {
@@ -22,6 +22,7 @@ type dbNews struct {
 	Content   string    `gorm:"type:text;not null"`
 	HouseID   string    `gorm:"column:house_id;type:uuid;not null;index"`
 	CreatedAt time.Time `gorm:"not null"`
+	CreatedBy string    `gorm:"column:created_by;type:uuid;index"`
 }
 
 func (dbNews) TableName() string { return "news" }
@@ -34,6 +35,7 @@ func (r *Repository) Migrate(ctx context.Context) error {
 	if err := r.db.WithContext(ctx).AutoMigrate(&dbNews{}); err != nil {
 		return fmt.Errorf("auto migrate: %w", err)
 	}
+
 	return nil
 }
 
@@ -43,10 +45,12 @@ func (r *Repository) Create(ctx context.Context, n *domain.News) (*domain.News, 
 		Content:   n.Content,
 		HouseID:   n.HouseID,
 		CreatedAt: time.Now().UTC(),
+		CreatedBy: n.CreatedBy,
 	}
 	if err := r.db.WithContext(ctx).Create(&row).Error; err != nil {
 		return nil, fmt.Errorf("create news: %w", err)
 	}
+
 	return newsToDomain(&row), nil
 }
 
@@ -56,8 +60,10 @@ func (r *Repository) GetByID(ctx context.Context, id string) (*domain.News, erro
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, infra_errors.ErrNewsNotFound
 		}
+
 		return nil, fmt.Errorf("get news: %w", err)
 	}
+
 	return newsToDomain(&row), nil
 }
 
@@ -67,9 +73,11 @@ func (r *Repository) List(ctx context.Context, req *domain.GetNewsRequest) ([]*d
 	if req.HouseID != "" {
 		query = query.Where("house_id = ?", req.HouseID)
 	}
+
 	if !req.DateFrom.IsZero() {
 		query = query.Where("created_at >= ?", req.DateFrom)
 	}
+
 	if !req.DateTo.IsZero() {
 		query = query.Where("created_at <= ?", req.DateTo)
 	}
@@ -83,6 +91,7 @@ func (r *Repository) List(ctx context.Context, req *domain.GetNewsRequest) ([]*d
 	if limit <= 0 || limit > 100 {
 		limit = 20
 	}
+
 	offset := req.Offset
 	if offset < 0 {
 		offset = 0
@@ -97,6 +106,7 @@ func (r *Repository) List(ctx context.Context, req *domain.GetNewsRequest) ([]*d
 	for i := range rows {
 		result = append(result, newsToDomain(&rows[i]))
 	}
+
 	return result, total, nil
 }
 
@@ -107,5 +117,6 @@ func newsToDomain(row *dbNews) *domain.News {
 		Content:   row.Content,
 		HouseID:   row.HouseID,
 		CreatedAt: row.CreatedAt,
+		CreatedBy: row.CreatedBy,
 	}
 }

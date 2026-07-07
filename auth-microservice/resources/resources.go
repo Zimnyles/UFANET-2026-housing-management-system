@@ -1,10 +1,6 @@
 package resources
 
 import (
-	"auth-service/infra/hasher"
-	"auth-service/infra/jwt"
-	"auth-service/infra/models/domain"
-	repo "auth-service/infra/repository"
 	"context"
 	"fmt"
 
@@ -12,6 +8,11 @@ import (
 	"github.com/rs/zerolog/log"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"auth-service/infra/hasher"
+	"auth-service/infra/jwt"
+	"auth-service/infra/models/domain"
+	repo "auth-service/infra/repository"
 )
 
 type Resources struct {
@@ -39,6 +40,7 @@ func (a *jwtAdapter) ParseRefresh(tokenStr string) (*domain.TokenClaims, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	return &domain.TokenClaims{
 		UserID: claims.UserID,
 		Role:   claims.Role,
@@ -63,19 +65,23 @@ func InitResources(ctx context.Context) (*Resources, error) {
 	if err != nil {
 		return nil, fmt.Errorf("connect postgres: %w", err)
 	}
+
 	sqlDB, err := db.DB()
 	if err != nil {
 		return nil, fmt.Errorf("postgres handle: %w", err)
 	}
+
 	if err := sqlDB.PingContext(ctx); err != nil {
 		return nil, fmt.Errorf("ping postgres: %w", err)
 	}
+
 	logger.Info().Str("host", env.PostgresHost).Int("port", env.PostgresPort).Msg("postgres connected")
 
 	repository := repo.New(db)
 	if err := repository.Migrate(ctx); err != nil {
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
+
 	logger.Info().Msg("migrations applied")
 
 	return &Resources{
@@ -92,6 +98,8 @@ func initLogger(serviceName, level string) *zerolog.Logger {
 	if err != nil {
 		lvl = zerolog.InfoLevel
 	}
+
 	logger := log.Level(lvl).With().Str("service", serviceName).Logger()
+
 	return &logger
 }

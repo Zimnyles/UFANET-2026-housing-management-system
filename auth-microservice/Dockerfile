@@ -15,8 +15,6 @@ COPY auth-microservice/ ./auth-microservice/
 WORKDIR /workspace/auth-microservice
 RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o /bin/srv ./cmd
 
-# ---
-
 FROM alpine:3.21 AS production
 
 RUN apk add --no-cache ca-certificates tzdata && \

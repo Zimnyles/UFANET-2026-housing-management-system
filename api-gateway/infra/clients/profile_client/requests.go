@@ -3,9 +3,8 @@ package profile_client
 import (
 	"context"
 
-	"api-gateway/internal/models/domain"
-
 	app_errors "api-gateway/internal/errors"
+	"api-gateway/internal/models/domain"
 )
 
 func (c *ProfileClient) GetProfile(ctx context.Context, userID string) (*domain.Profile, error) {
@@ -13,6 +12,7 @@ func (c *ProfileClient) GetProfile(ctx context.Context, userID string) (*domain.
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	return toDomainProfile(resp.GetProfile()), nil
 }
 
@@ -21,6 +21,7 @@ func (c *ProfileClient) UpsertProfile(ctx context.Context, req *domain.UpsertPro
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	return toDomainProfile(resp.GetProfile()), nil
 }
 
@@ -29,6 +30,7 @@ func (c *ProfileClient) IsProfileComplete(ctx context.Context, userID string) (b
 	if err != nil {
 		return false, app_errors.FromGRPC(err)
 	}
+
 	return resp.GetComplete(), nil
 }
 
@@ -37,6 +39,7 @@ func (c *ProfileClient) CreateManagementCompany(ctx context.Context, req *domain
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	return toDomainManagementCompany(resp.GetCompany()), nil
 }
 
@@ -45,10 +48,12 @@ func (c *ProfileClient) ListManagementCompanies(ctx context.Context) ([]*domain.
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	result := make([]*domain.ManagementCompany, 0, len(resp.GetCompanies()))
 	for _, c := range resp.GetCompanies() {
 		result = append(result, toDomainManagementCompany(c))
 	}
+
 	return result, nil
 }
 
@@ -57,6 +62,7 @@ func (c *ProfileClient) CreateHouse(ctx context.Context, req *domain.CreateHouse
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	return toDomainHouse(resp.GetHouse()), nil
 }
 
@@ -65,9 +71,11 @@ func (c *ProfileClient) ListHouses(ctx context.Context, ukID string) ([]*domain.
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	result := make([]*domain.House, 0, len(resp.GetHouses()))
 	for _, h := range resp.GetHouses() {
 		result = append(result, toDomainHouse(h))
 	}
+
 	return result, nil
 }

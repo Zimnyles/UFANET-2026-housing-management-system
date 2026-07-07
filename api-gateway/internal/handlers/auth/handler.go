@@ -4,11 +4,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gofiber/fiber/v2"
+	"github.com/rs/zerolog"
+
 	app_errors "api-gateway/internal/errors"
 	"api-gateway/internal/models/constants"
 	"api-gateway/internal/models/dto"
-	"github.com/gofiber/fiber/v2"
-	"github.com/rs/zerolog"
 )
 
 type AuthHandler struct {

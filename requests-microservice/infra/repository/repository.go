@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"time"
 
+	"gorm.io/gorm"
+
 	infra_errors "requests-service/infra/errors"
 	"requests-service/infra/models/domain"
-
-	"gorm.io/gorm"
 )
 
 type Repository struct {
@@ -51,6 +51,7 @@ func (r *Repository) Migrate(ctx context.Context) error {
 	if err := r.db.WithContext(ctx).AutoMigrate(&dbMaintenanceRequest{}, &dbComment{}); err != nil {
 		return fmt.Errorf("auto migrate: %w", err)
 	}
+
 	return nil
 }
 
@@ -67,6 +68,7 @@ func (r *Repository) Create(ctx context.Context, req *domain.MaintenanceRequest)
 	if err := r.db.WithContext(ctx).Create(&row).Error; err != nil {
 		return nil, fmt.Errorf("create request: %w", err)
 	}
+
 	return requestToDomain(&row), nil
 }
 
@@ -76,8 +78,10 @@ func (r *Repository) GetByID(ctx context.Context, id string) (*domain.Maintenanc
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, infra_errors.ErrRequestNotFound
 		}
+
 		return nil, fmt.Errorf("get request: %w", err)
 	}
+
 	return requestToDomain(&row), nil
 }
 
@@ -86,9 +90,11 @@ func (r *Repository) List(ctx context.Context, req *domain.GetRequestsRequest) (
 	if req.UserID != "" {
 		query = query.Where("user_id = ?", req.UserID)
 	}
+
 	if req.Status != "" {
 		query = query.Where("status = ?", req.Status)
 	}
+
 	if req.Type != "" {
 		query = query.Where("type = ?", req.Type)
 	}
@@ -102,6 +108,7 @@ func (r *Repository) List(ctx context.Context, req *domain.GetRequestsRequest) (
 	if limit <= 0 || limit > 100 {
 		limit = 20
 	}
+
 	offset := req.Offset
 	if offset < 0 {
 		offset = 0
@@ -116,6 +123,7 @@ func (r *Repository) List(ctx context.Context, req *domain.GetRequestsRequest) (
 	for i := range rows {
 		result = append(result, requestToDomain(&rows[i]))
 	}
+
 	return result, total, nil
 }
 
@@ -125,14 +133,17 @@ func (r *Repository) UpdateStatus(ctx context.Context, id string, status string)
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, infra_errors.ErrRequestNotFound
 		}
+
 		return nil, fmt.Errorf("get request: %w", err)
 	}
 
 	row.Status = status
+
 	row.UpdatedAt = time.Now().UTC()
 	if err := r.db.WithContext(ctx).Save(&row).Error; err != nil {
 		return nil, fmt.Errorf("update request status: %w", err)
 	}
+
 	return requestToDomain(&row), nil
 }
 
@@ -140,6 +151,7 @@ func (r *Repository) AddComment(ctx context.Context, comment *domain.Comment) (*
 	if _, err := r.GetByID(ctx, comment.RequestID); err != nil {
 		return nil, err
 	}
+
 	row := dbComment{
 		RequestID: comment.RequestID,
 		UserID:    comment.UserID,
@@ -149,6 +161,7 @@ func (r *Repository) AddComment(ctx context.Context, comment *domain.Comment) (*
 	if err := r.db.WithContext(ctx).Create(&row).Error; err != nil {
 		return nil, fmt.Errorf("add comment: %w", err)
 	}
+
 	return commentToDomain(&row), nil
 }
 
@@ -162,6 +175,7 @@ func (r *Repository) ListComments(ctx context.Context, requestID string) ([]*dom
 	for i := range rows {
 		result = append(result, commentToDomain(&rows[i]))
 	}
+
 	return result, nil
 }
 

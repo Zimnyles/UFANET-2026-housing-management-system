@@ -1,5 +1,7 @@
 package domain
 
+import "time"
+
 type Platform string
 
 const (
@@ -15,4 +17,17 @@ func (p Platform) Valid() bool {
 	}
 
 	return false
+}
+
+type BrowserNotification struct {
+	Type      string    `json:"type"`
+	Title     string    `json:"title"`
+	Body      string    `json:"body"`
+	URL       string    `json:"url"`
+	CreatedAt time.Time `json:"created_at"`
+}
+
+type RegisterDevice struct {
+	DeviceToken string
+	Platform    Platform
 }

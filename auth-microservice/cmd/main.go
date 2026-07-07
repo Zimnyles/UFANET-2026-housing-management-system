@@ -1,13 +1,14 @@
 package main
 
 import (
-	"auth-service/api"
-	"auth-service/pkg/context_os"
-	"auth-service/resources"
 	"context"
 	"errors"
 
 	"github.com/rs/zerolog/log"
+
+	"auth-service/api"
+	"auth-service/pkg/context_os"
+	"auth-service/resources"
 )
 
 func main() {

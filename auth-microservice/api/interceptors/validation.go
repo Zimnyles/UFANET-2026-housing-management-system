@@ -1,11 +1,12 @@
 package interceptors
 
 import (
-	"auth-service/api/server"
 	"context"
 
 	authpb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/auth/langs/go"
 	"google.golang.org/grpc"
+
+	"auth-service/api/server"
 )
 
 func Validation() grpc.UnaryServerInterceptor {
@@ -13,6 +14,7 @@ func Validation() grpc.UnaryServerInterceptor {
 		if err := validate(req); err != nil {
 			return nil, err
 		}
+
 		return handler(ctx, req)
 	}
 }
@@ -28,5 +30,6 @@ func validate(req interface{}) error {
 	case *authpb.LogoutRequest:
 		return server.ValidateLogoutRequest(r)
 	}
+
 	return nil
 }

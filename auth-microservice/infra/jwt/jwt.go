@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+
+	infra_errors "auth-service/infra/errors"
 )
 
 type Claims struct {
@@ -49,26 +51,31 @@ func (m *Manager) generate(userID, role string, ttl time.Duration) (string, erro
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
 	signed, err := token.SignedString([]byte(m.secret))
 	if err != nil {
 		return "", fmt.Errorf("sign token: %w", err)
 	}
+
 	return signed, nil
 }
 
 func (m *Manager) parse(tokenStr string) (*Claims, error) {
 	token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(t *jwt.Token) (interface{}, error) {
 		if _, ok := t.Method.(*jwt.SigningMethodHMAC); !ok {
-			return nil, fmt.Errorf("unexpected signing method: %v", t.Header["alg"])
+			return nil, fmt.Errorf("%w: %v", infra_errors.ErrUnexpectedSigningMethod, t.Header["alg"])
 		}
+
 		return []byte(m.secret), nil
 	})
 	if err != nil {
 		return nil, fmt.Errorf("parse token: %w", err)
 	}
+
 	claims, ok := token.Claims.(*Claims)
 	if !ok || !token.Valid {
-		return nil, fmt.Errorf("invalid token claims")
+		return nil, infra_errors.ErrInvalidToken
 	}
+
 	return claims, nil
 }

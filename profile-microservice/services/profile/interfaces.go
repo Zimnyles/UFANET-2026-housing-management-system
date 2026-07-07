@@ -2,6 +2,7 @@ package profile_service
 
 import (
 	"context"
+
 	"profile-service/infra/models/domain"
 )
 

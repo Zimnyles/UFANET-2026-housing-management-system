@@ -2,10 +2,11 @@ package interceptors
 
 import (
 	"context"
-	"profile-service/api/server"
 
 	profilepb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/profile/langs/go"
 	"google.golang.org/grpc"
+
+	"profile-service/api/server"
 )
 
 func Validation() grpc.UnaryServerInterceptor {
@@ -13,6 +14,7 @@ func Validation() grpc.UnaryServerInterceptor {
 		if err := validate(req); err != nil {
 			return nil, err
 		}
+
 		return handler(ctx, req)
 	}
 }
@@ -28,5 +30,6 @@ func validate(req interface{}) error {
 	case *profilepb.CreateHouseRequest:
 		return server.ValidateCreateHouseRequest(r)
 	}
+
 	return nil
 }

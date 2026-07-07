@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 
-	authpb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/auth/langs/go"
 	"github.com/rs/zerolog"
+	authpb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/auth/langs/go"
 	"google.golang.org/protobuf/types/known/emptypb"
 )
 
@@ -23,6 +23,7 @@ func (s *AuthServer) Register(ctx context.Context, req *authpb.RegisterRequest) 
 	if err != nil {
 		return nil, err
 	}
+
 	return ConvertFromDomainToAuthResponse(result), nil
 }
 
@@ -31,6 +32,7 @@ func (s *AuthServer) Login(ctx context.Context, req *authpb.LoginRequest) (*auth
 	if err != nil {
 		return nil, err
 	}
+
 	return ConvertFromDomainToAuthResponse(result), nil
 }
 
@@ -39,6 +41,7 @@ func (s *AuthServer) Refresh(ctx context.Context, req *authpb.RefreshRequest) (*
 	if err != nil {
 		return nil, err
 	}
+
 	return ConvertFromDomainToRefreshResponse(result), nil
 }
 
@@ -46,5 +49,6 @@ func (s *AuthServer) Logout(ctx context.Context, req *authpb.LogoutRequest) (*em
 	if err := s.service.Logout(ctx, ConvertFromProtoToLogoutRequest(req)); err != nil {
 		return nil, err
 	}
+
 	return &emptypb.Empty{}, nil
 }

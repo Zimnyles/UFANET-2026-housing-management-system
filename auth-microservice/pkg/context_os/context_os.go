@@ -18,6 +18,7 @@ func Context(ctx context.Context, logger *zerolog.Logger) context.Context {
 
 	go func() {
 		defer signal.Stop(sigs)
+
 		select {
 		case <-ctx.Done():
 		case sig := <-sigs:

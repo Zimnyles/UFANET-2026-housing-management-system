@@ -1,8 +1,9 @@
 package auth
 
 import (
-	"auth-service/infra/models/domain"
 	"context"
+
+	"auth-service/infra/models/domain"
 )
 
 type Repository interface {

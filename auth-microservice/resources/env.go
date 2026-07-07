@@ -47,5 +47,6 @@ func initEnv() (*Env, error) {
 	if err := envconfig.Process("", &e); err != nil {
 		return nil, fmt.Errorf("init env: %w", err)
 	}
+
 	return &e, nil
 }

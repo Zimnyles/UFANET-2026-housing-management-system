@@ -1,4 +1,3 @@
-# Build context: project root  (docker-compose: context: .)
 FROM golang:1.25-alpine AS build
 
 WORKDIR /workspace

@@ -1,12 +1,13 @@
 package auth
 
 import (
-	infra_errors "auth-service/infra/errors"
-	"auth-service/infra/models/domain"
 	"context"
 	"fmt"
 
 	"github.com/rs/zerolog"
+
+	infra_errors "auth-service/infra/errors"
+	"auth-service/infra/models/domain"
 )
 
 type AuthService struct {
@@ -27,15 +28,19 @@ func New(repo Repository, jwt JWTManager, hasher Hasher, logger *zerolog.Logger)
 
 func (s *AuthService) Register(ctx context.Context, req *domain.RegisterRequest) (*domain.AuthResult, error) {
 	role := "user"
+
 	if req.AdminCode != "" {
 		active, err := s.repo.IsActiveAdminCode(ctx, req.AdminCode)
 		if err != nil {
 			s.logger.Error().Err(err).Msg("register: check admin code failed")
+
 			return nil, err
 		}
+
 		if !active {
 			return nil, infra_errors.ErrInvalidAdminCode
 		}
+
 		role = "admin"
 	}
 
@@ -44,13 +49,10 @@ func (s *AuthService) Register(ctx context.Context, req *domain.RegisterRequest)
 		return nil, fmt.Errorf("hash password: %w", err)
 	}
 
-	user, err := s.repo.CreateUser(ctx, &domain.User{
-		Email:        req.Email,
-		PasswordHash: passwordHash,
-		Role:         role,
-	})
+	user, err := s.repo.CreateUser(ctx, registerRequestToUser(req, passwordHash, role))
 	if err != nil {
 		s.logger.Error().Err(err).Str("email", req.Email).Msg("register: create user failed")
+
 		return nil, err
 	}
 
@@ -61,6 +63,7 @@ func (s *AuthService) Login(ctx context.Context, req *domain.LoginRequest) (*dom
 	user, err := s.repo.GetUserByEmail(ctx, req.Email)
 	if err != nil {
 		s.logger.Error().Err(err).Str("email", req.Email).Msg("login: get user failed")
+
 		return nil, err
 	}
 
@@ -75,6 +78,7 @@ func (s *AuthService) Refresh(ctx context.Context, req *domain.RefreshRequest) (
 	tokenClaims, err := s.jwt.ParseRefresh(req.RefreshToken)
 	if err != nil {
 		s.logger.Error().Err(err).Msg("refresh: invalid token")
+
 		return nil, infra_errors.ErrInvalidToken
 	}
 
@@ -84,7 +88,8 @@ func (s *AuthService) Refresh(ctx context.Context, req *domain.RefreshRequest) (
 	}
 
 	s.logger.Info().Str("user_id", tokenClaims.UserID).Msg("token refreshed")
-	return &domain.RefreshResult{AccessToken: accessToken}, nil
+
+	return accessTokenToRefreshResult(accessToken), nil
 }
 
 func (s *AuthService) Logout(_ context.Context, _ *domain.LogoutRequest) error {
@@ -103,9 +108,6 @@ func (s *AuthService) issueTokens(user *domain.User) (*domain.AuthResult, error)
 	}
 
 	s.logger.Info().Str("user_id", user.ID).Msg("tokens issued")
-	return &domain.AuthResult{
-		UserID:       user.ID,
-		AccessToken:  accessToken,
-		RefreshToken: refreshToken,
-	}, nil
+
+	return tokensToAuthResult(user.ID, accessToken, refreshToken), nil
 }

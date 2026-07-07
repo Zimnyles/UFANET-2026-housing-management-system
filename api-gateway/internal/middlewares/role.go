@@ -1,9 +1,10 @@
 package middlewares
 
 import (
+	"github.com/gofiber/fiber/v2"
+
 	app_errors "api-gateway/internal/errors"
 	"api-gateway/internal/models/constants"
-	"github.com/gofiber/fiber/v2"
 )
 
 func (mw *Middlewares) RequireRole(roles ...string) fiber.Handler {

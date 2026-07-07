@@ -3,9 +3,10 @@ package news_service
 import (
 	"context"
 	"fmt"
-	"news-service/infra/models/domain"
 
 	"github.com/rs/zerolog"
+
+	"news-service/infra/models/domain"
 )
 
 type NewsService struct {
@@ -19,29 +20,22 @@ func New(repo Repository, publisher Publisher, logger *zerolog.Logger) *NewsServ
 }
 
 func (s *NewsService) CreateNews(ctx context.Context, req *domain.CreateNewsRequest) (*domain.News, error) {
-	n, err := s.repo.Create(ctx, &domain.News{
-		Title:   req.Title,
-		Content: req.Content,
-		HouseID: req.HouseID,
-	})
+	n, err := s.repo.Create(ctx, createNewsRequestToModel(req))
 	if err != nil {
 		s.logger.Error().Err(err).Str("house_id", req.HouseID).Msg("create news failed")
+
 		return nil, fmt.Errorf("create news: %w", err)
 	}
 
 	if s.publisher != nil {
-		evt := domain.NewsCreatedEvent{
-			Type:    "news.created",
-			NewsID:  n.ID,
-			Title:   n.Title,
-			HouseID: n.HouseID,
-		}
+		evt := newsToCreatedEvent(n)
 		if pErr := s.publisher.PublishNewsCreated(ctx, evt); pErr != nil {
 			s.logger.Warn().Err(pErr).Str("news_id", n.ID).Msg("publish news.created failed (news saved)")
 		}
 	}
 
 	s.logger.Info().Str("id", n.ID).Str("house_id", n.HouseID).Msg("news created")
+
 	return n, nil
 }
 

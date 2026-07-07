@@ -1,9 +1,11 @@
 package requests_client
 
 import (
-	"api-gateway/internal/models/domain"
+	"math"
 
 	requestspb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/requests/langs/go"
+
+	"api-gateway/internal/models/domain"
 )
 
 func toProtoCreateRequest(req *domain.CreateMaintenanceRequest) *requestspb.CreateRequestRequest {
@@ -20,9 +22,21 @@ func toProtoGetRequests(req *domain.ListMaintenanceRequests) *requestspb.GetRequ
 		UserId: req.UserID,
 		Status: req.Status,
 		Type:   req.Type,
-		Limit:  int32(req.Limit),
-		Offset: int32(req.Offset),
+		Limit:  paginationInt32(req.Limit),
+		Offset: paginationInt32(req.Offset),
 	}
+}
+
+func paginationInt32(value int) int32 {
+	if value <= 0 {
+		return 0
+	}
+
+	if value > math.MaxInt32 {
+		return math.MaxInt32
+	}
+
+	return int32(value)
 }
 
 func toProtoGetRequest(id string) *requestspb.GetRequestRequest {
@@ -53,6 +67,7 @@ func toDomainRequest(pb *requestspb.MaintenanceRequest) *domain.MaintenanceReque
 	if pb == nil {
 		return nil
 	}
+
 	return &domain.MaintenanceRequest{
 		ID:          pb.GetId(),
 		Title:       pb.GetTitle(),
@@ -69,6 +84,7 @@ func toDomainComment(pb *requestspb.Comment) *domain.RequestComment {
 	if pb == nil {
 		return nil
 	}
+
 	return &domain.RequestComment{
 		ID:        pb.GetId(),
 		RequestID: pb.GetRequestId(),

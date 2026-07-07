@@ -3,9 +3,10 @@ package auth_service
 import (
 	"context"
 
+	"github.com/rs/zerolog"
+
 	app_errors "api-gateway/internal/errors"
 	"api-gateway/internal/models/domain"
-	"github.com/rs/zerolog"
 )
 
 type AuthService struct {

@@ -4,14 +4,20 @@ import (
 	"context"
 	"net"
 
+	profilepb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/profile/langs/go"
+	"google.golang.org/grpc"
+
 	"profile-service/api/interceptors"
 	"profile-service/api/server"
 	"profile-service/resources"
 	profile_service "profile-service/services/profile"
-
-	profilepb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/profile/langs/go"
-	"google.golang.org/grpc"
 )
+
+var listen = func(ctx context.Context, network, address string) (net.Listener, error) {
+	var c net.ListenConfig
+
+	return c.Listen(ctx, network, address)
+}
 
 type API struct {
 	res *resources.Resources
@@ -35,14 +41,16 @@ func (a *API) Start(ctx context.Context) error {
 
 	profilepb.RegisterProfileServiceServer(srv, profileServer)
 
-	lis, err := net.Listen("tcp", a.res.Env.Addr())
+	lis, err := listen(ctx, "tcp", a.res.Env.Addr())
 	if err != nil {
 		return err
 	}
 
 	errCh := make(chan error, 1)
+
 	go func() {
 		a.res.Logger.Info().Str("addr", a.res.Env.Addr()).Msg("starting gRPC server")
+
 		errCh <- srv.Serve(lis)
 	}()
 
@@ -50,6 +58,7 @@ func (a *API) Start(ctx context.Context) error {
 	case <-ctx.Done():
 		a.res.Logger.Info().Msg("shutting down gRPC server")
 		srv.GracefulStop()
+
 		return nil
 	case err := <-errCh:
 		return err

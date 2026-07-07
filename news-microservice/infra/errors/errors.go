@@ -3,9 +3,9 @@ package errors
 import "errors"
 
 var (
-	ErrNewsNotFound  = errors.New("news not found")
-	ErrInternal      = errors.New("internal server error")
-	ErrMQPublish     = errors.New("failed to publish message")
+	ErrNewsNotFound = errors.New("news not found")
+	ErrInternal     = errors.New("internal server error")
+	ErrMQPublish    = errors.New("failed to publish message")
 )
 
 var (

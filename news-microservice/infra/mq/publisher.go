@@ -5,10 +5,10 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"news-service/infra/models/domain"
-
 	amqp "github.com/rabbitmq/amqp091-go"
 	"github.com/rs/zerolog"
+
+	"news-service/infra/models/domain"
 )
 
 const (
@@ -21,8 +21,13 @@ const (
 
 type Publisher struct {
 	conn    *amqp.Connection
-	channel *amqp.Channel
+	channel publisherChannel
 	logger  *zerolog.Logger
+}
+
+type publisherChannel interface {
+	PublishWithContext(context.Context, string, string, bool, bool, amqp.Publishing) error
+	Close() error
 }
 
 func New(dsn string, logger *zerolog.Logger) (*Publisher, error) {
@@ -34,6 +39,7 @@ func New(dsn string, logger *zerolog.Logger) (*Publisher, error) {
 	ch, err := conn.Channel()
 	if err != nil {
 		_ = conn.Close()
+
 		return nil, fmt.Errorf("rabbitmq channel: %w", err)
 	}
 
@@ -48,6 +54,7 @@ func New(dsn string, logger *zerolog.Logger) (*Publisher, error) {
 	); err != nil {
 		_ = ch.Close()
 		_ = conn.Close()
+
 		return nil, fmt.Errorf("declare exchange: %w", err)
 	}
 
@@ -90,8 +97,10 @@ func (p *Publisher) Close() error {
 	if p.channel != nil {
 		_ = p.channel.Close()
 	}
+
 	if p.conn != nil {
 		return p.conn.Close()
 	}
+
 	return nil
 }

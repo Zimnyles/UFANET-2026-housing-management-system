@@ -2,9 +2,10 @@ package server
 
 import (
 	"context"
+	"math"
 
-	newspb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/news/langs/go"
 	"github.com/rs/zerolog"
+	newspb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/news/langs/go"
 )
 
 type NewsServer struct {
@@ -22,6 +23,7 @@ func (s *NewsServer) CreateNews(ctx context.Context, req *newspb.CreateNewsReque
 	if err != nil {
 		return nil, err
 	}
+
 	return &newspb.NewsResponse{News: domainToProtoNews(n)}, nil
 }
 
@@ -30,6 +32,7 @@ func (s *NewsServer) GetNewsItem(ctx context.Context, req *newspb.GetNewsItemReq
 	if err != nil {
 		return nil, err
 	}
+
 	return &newspb.NewsResponse{News: domainToProtoNews(n)}, nil
 }
 
@@ -38,9 +41,23 @@ func (s *NewsServer) GetNews(ctx context.Context, req *newspb.GetNewsRequest) (*
 	if err != nil {
 		return nil, err
 	}
+
 	pb := make([]*newspb.News, 0, len(items))
 	for _, n := range items {
 		pb = append(pb, domainToProtoNews(n))
 	}
-	return &newspb.GetNewsResponse{News: pb, Total: int32(total)}, nil
+
+	return &newspb.GetNewsResponse{News: pb, Total: totalToInt32(total)}, nil
+}
+
+func totalToInt32(total int64) int32 {
+	if total <= 0 {
+		return 0
+	}
+
+	if total > math.MaxInt32 {
+		return math.MaxInt32
+	}
+
+	return int32(total)
 }

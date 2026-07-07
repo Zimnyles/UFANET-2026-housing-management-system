@@ -3,16 +3,17 @@ package server
 import (
 	"time"
 
-	"news-service/infra/models/domain"
-
 	newspb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/news/langs/go"
+
+	"news-service/infra/models/domain"
 )
 
 func protoToCreateNews(req *newspb.CreateNewsRequest) *domain.CreateNewsRequest {
 	return &domain.CreateNewsRequest{
-		Title:   req.GetTitle(),
-		Content: req.GetContent(),
-		HouseID: req.GetHouseId(),
+		Title:     req.GetTitle(),
+		Content:   req.GetContent(),
+		HouseID:   req.GetHouseId(),
+		CreatedBy: req.GetCreatedBy(),
 	}
 }
 
@@ -27,11 +28,13 @@ func protoToGetNews(req *newspb.GetNewsRequest) *domain.GetNewsRequest {
 			out.DateFrom = t
 		}
 	}
+
 	if to := req.GetDateTo(); to != "" {
 		if t, err := time.Parse(time.RFC3339, to); err == nil {
 			out.DateTo = t
 		}
 	}
+
 	return out
 }
 
@@ -42,5 +45,6 @@ func domainToProtoNews(n *domain.News) *newspb.News {
 		Content:   n.Content,
 		HouseId:   n.HouseID,
 		CreatedAt: n.CreatedAt.UTC().Format(time.RFC3339),
+		CreatedBy: n.CreatedBy,
 	}
 }

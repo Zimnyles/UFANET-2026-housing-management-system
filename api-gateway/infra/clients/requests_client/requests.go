@@ -12,6 +12,7 @@ func (c *RequestsClient) CreateRequest(ctx context.Context, req *domain.CreateMa
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	return toDomainRequest(resp.GetRequest()), nil
 }
 
@@ -20,10 +21,12 @@ func (c *RequestsClient) GetRequests(ctx context.Context, req *domain.ListMainte
 	if err != nil {
 		return nil, 0, app_errors.FromGRPC(err)
 	}
+
 	result := make([]*domain.MaintenanceRequest, 0, len(resp.GetRequests()))
 	for _, item := range resp.GetRequests() {
 		result = append(result, toDomainRequest(item))
 	}
+
 	return result, int64(resp.GetTotal()), nil
 }
 
@@ -32,6 +35,7 @@ func (c *RequestsClient) GetRequest(ctx context.Context, id string) (*domain.Mai
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	return toDomainRequest(resp.GetRequest()), nil
 }
 
@@ -40,6 +44,7 @@ func (c *RequestsClient) UpdateRequestStatus(ctx context.Context, req *domain.Up
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	return toDomainRequest(resp.GetRequest()), nil
 }
 
@@ -48,6 +53,7 @@ func (c *RequestsClient) AddComment(ctx context.Context, req *domain.AddMaintena
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	return toDomainComment(resp.GetComment()), nil
 }
 
@@ -56,9 +62,11 @@ func (c *RequestsClient) GetComments(ctx context.Context, requestID string) ([]*
 	if err != nil {
 		return nil, app_errors.FromGRPC(err)
 	}
+
 	result := make([]*domain.RequestComment, 0, len(resp.GetComments()))
 	for _, item := range resp.GetComments() {
 		result = append(result, toDomainComment(item))
 	}
+
 	return result, nil
 }

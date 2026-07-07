@@ -3,8 +3,8 @@ package server
 import (
 	"context"
 
-	profilepb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/profile/langs/go"
 	"github.com/rs/zerolog"
+	profilepb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/profile/langs/go"
 )
 
 type ProfileServer struct {
@@ -22,6 +22,7 @@ func (s *ProfileServer) GetProfile(ctx context.Context, req *profilepb.GetProfil
 	if err != nil {
 		return nil, err
 	}
+
 	return &profilepb.ProfileResponse{Profile: domainToProtoProfile(p)}, nil
 }
 
@@ -30,6 +31,7 @@ func (s *ProfileServer) UpsertProfile(ctx context.Context, req *profilepb.Upsert
 	if err != nil {
 		return nil, err
 	}
+
 	return &profilepb.ProfileResponse{Profile: domainToProtoProfile(p)}, nil
 }
 
@@ -38,6 +40,7 @@ func (s *ProfileServer) IsProfileComplete(ctx context.Context, req *profilepb.Is
 	if err != nil {
 		return nil, err
 	}
+
 	return &profilepb.IsProfileCompleteResponse{Complete: complete}, nil
 }
 
@@ -46,6 +49,7 @@ func (s *ProfileServer) CreateManagementCompany(ctx context.Context, req *profil
 	if err != nil {
 		return nil, err
 	}
+
 	return &profilepb.ManagementCompanyResponse{Company: domainToProtoCompany(c)}, nil
 }
 
@@ -54,10 +58,12 @@ func (s *ProfileServer) ListManagementCompanies(ctx context.Context, _ *profilep
 	if err != nil {
 		return nil, err
 	}
+
 	pb := make([]*profilepb.ManagementCompany, 0, len(companies))
 	for _, c := range companies {
 		pb = append(pb, domainToProtoCompany(c))
 	}
+
 	return &profilepb.ListManagementCompaniesResponse{Companies: pb}, nil
 }
 
@@ -66,6 +72,7 @@ func (s *ProfileServer) CreateHouse(ctx context.Context, req *profilepb.CreateHo
 	if err != nil {
 		return nil, err
 	}
+
 	return &profilepb.HouseResponse{House: domainToProtoHouse(h)}, nil
 }
 
@@ -74,9 +81,11 @@ func (s *ProfileServer) ListHouses(ctx context.Context, req *profilepb.ListHouse
 	if err != nil {
 		return nil, err
 	}
+
 	pb := make([]*profilepb.House, 0, len(houses))
 	for _, h := range houses {
 		pb = append(pb, domainToProtoHouse(h))
 	}
+
 	return &profilepb.ListHousesResponse{Houses: pb}, nil
 }

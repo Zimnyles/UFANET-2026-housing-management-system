@@ -3,13 +3,14 @@ package errors
 import "errors"
 
 var (
-	ErrUserNotFound       = errors.New("user not found")
-	ErrEmailAlreadyExists = errors.New("email already exists")
-	ErrInvalidCredentials = errors.New("invalid credentials")
-	ErrInvalidToken       = errors.New("invalid token")
-	ErrTokenExpired       = errors.New("token expired")
-	ErrTokenNotFound      = errors.New("refresh token not found")
-	ErrInternal           = errors.New("internal server error")
+	ErrUserNotFound            = errors.New("user not found")
+	ErrEmailAlreadyExists      = errors.New("email already exists")
+	ErrInvalidCredentials      = errors.New("invalid credentials")
+	ErrInvalidToken            = errors.New("invalid token")
+	ErrTokenExpired            = errors.New("token expired")
+	ErrTokenNotFound           = errors.New("refresh token not found")
+	ErrInternal                = errors.New("internal server error")
+	ErrUnexpectedSigningMethod = errors.New("unexpected JWT signing method")
 )
 
 var (

@@ -1,17 +1,16 @@
 package profile_client
 
 import (
-	"api-gateway/internal/models/domain"
-
 	profilepb "github.com/zimnyles/UFANET-2026-housing-management-system/contracts/profile/langs/go"
-)
 
-// ─── proto → domain ───────────────────────────────────────────────────────────
+	"api-gateway/internal/models/domain"
+)
 
 func toDomainProfile(pb *profilepb.Profile) *domain.Profile {
 	if pb == nil {
 		return nil
 	}
+
 	return &domain.Profile{
 		UserID:    pb.GetUserId(),
 		FullName:  pb.GetFullName(),
@@ -26,6 +25,7 @@ func toDomainManagementCompany(pb *profilepb.ManagementCompany) *domain.Manageme
 	if pb == nil {
 		return nil
 	}
+
 	return &domain.ManagementCompany{ID: pb.GetId(), Name: pb.GetName()}
 }
 
@@ -33,6 +33,7 @@ func toDomainHouse(pb *profilepb.House) *domain.House {
 	if pb == nil {
 		return nil
 	}
+
 	return &domain.House{
 		ID:      pb.GetId(),
 		Name:    pb.GetName(),
@@ -40,8 +41,6 @@ func toDomainHouse(pb *profilepb.House) *domain.House {
 		UKID:    pb.GetUkId(),
 	}
 }
-
-// ─── domain → proto ───────────────────────────────────────────────────────────
 
 func toProtoGetProfileRequest(userID string) *profilepb.GetProfileRequest {
 	return &profilepb.GetProfileRequest{UserId: userID}
